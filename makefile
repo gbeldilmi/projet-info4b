@@ -4,8 +4,8 @@
 PROJECT_NAME        := corewar
 JAVA_FILES          := $(shell find $(PROJECT_NAME)/ -type f -name '*.java')
 CLASS_FILES         := $(shell find $(PROJECT_NAME)/ -type f -name '*.class')
-SERVER_ENTRY_POINT  := $(PROJECT_NAME).Server
-CLIENT_ENTRY_POINT  := $(PROJECT_NAME).Client
+SERVER_ENTRY_POINT  := $(PROJECT_NAME).server.Main
+CLIENT_ENTRY_POINT  := $(PROJECT_NAME).client.Main
 
 #------------------------------------------------------------------------------#
 # Commands                                                                     #
@@ -13,7 +13,7 @@ CLIENT_ENTRY_POINT  := $(PROJECT_NAME).Client
 .PHONY : all, clean, run-client, run-server
 all :
 	javac $(JAVA_FILES)
-clean : all
+clean :
 	rm -v $(CLASS_FILES)
 run-client : all
 	java $(CLIENT_ENTRY_POINT)
