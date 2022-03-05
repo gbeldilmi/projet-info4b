@@ -29,7 +29,19 @@ public class File {
 	}
 
 	public static void write(String path, ArrayList<String> content) {
+		int i;
+		int j;
 
+		try (FileOutputStream out = new FileOutputStream(path, true)) {
+			for (i = 0; i < content.size(); i++) {
+				for (j = 0; j < content.get(i).length(); j++)
+					out.write(content.get(i).charAt(j));
+				if (i < content.size() - 1)	
+					out.write('\n');
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	// delete
