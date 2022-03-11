@@ -1,4 +1,4 @@
-package corewar.utils.Network;
+package corewar.utils.network;
 
 import java.io.*;
 import java.net.*;
@@ -25,5 +25,5 @@ public class ServerIO {
         }
     }
 
-    public 
+    //public 
 }
