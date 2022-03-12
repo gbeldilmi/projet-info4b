@@ -15,7 +15,7 @@ public class Instruction {
   public Instruction(String instruction, int ownerId) {
     String[] args = instruction.split(" ");
     try {
-      op = OpCode.valueOf(args[0]);
+      op = OpCode.getOpCode(args[0]);
       arg1 = new Argument(args[1]);
       arg2 = new Argument(args[2]);
     } catch (Exception e) {
