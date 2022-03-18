@@ -16,6 +16,14 @@ public enum AddressMode {
     return INDIRECT;
   }
 
+  public static AddressMode getAddressMode(int code) {
+    return AddressMode.values()[code % (AddressMode.values().length)];
+  }
+
+  public int getCode() {
+    return ordinal();
+  }
+
   public String toString() {
     switch (this) {
       case IMMEDIATE:
