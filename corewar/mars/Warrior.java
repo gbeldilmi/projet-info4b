@@ -5,7 +5,7 @@ public class Warrior {
   private int id, position, rank;
   private boolean alive;
 
-  Warrior(int id, String[] program) {
+  public Warrior(int id, String[] program) {
     this.id = id;
     this.program = program.length > 0 ? program : new String[] { "DAT 0 0" };
     position = 0;

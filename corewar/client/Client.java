@@ -1,80 +1,54 @@
 package corewar.client;
 
-import corewar.utils.Read;
-import java.net.Socket;
+import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.IOException;
+import java.net.Socket;
 
 public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
-    private String username;
+    private String username = null;
 
     public Client(Socket socket) {
         try {
             this.socket = socket;
-            this.bufferedReader = new BufferedReader(new InputStreamReader(this.socket.getInputStream()));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(this.socket.getOutputStream()));
-            this.initUsername();
+            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {
-            closeEverything(this.socket, this.bufferedReader, this.bufferedWriter);
+            this.close();
         }
     }
 
-    private void initUsername() {
-        System.out.print("Username : ");
-        String username = Read.S();
-        // send
-        // besoin de récupérer la reponse de la reqête, attribut ou juste readline ????
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public void sendMessage() {
+    public String request(String request) {
+        String response = null;
+
         try {
-            this.bufferedWriter.write(this.username);
+            this.bufferedWriter.write(request);
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
-
-            while (this.socket.isConnected()) {
-                String messageToSend = Read.S();
-                this.bufferedWriter.write(messageToSend);
-                this.bufferedWriter.newLine();
-                this.bufferedWriter.flush();
-            }
+            response = this.bufferedReader.readLine();
         } catch (IOException e) {
-            closeEverything(this.socket, this.bufferedReader, this.bufferedWriter);
+            this.close();
         }
+        return response;
     }
 
-    public void listenForMessage() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String msgFromGroupChat;
-
-                while (socket.isConnected()) {
-                    try {
-                        msgFromGroupChat = bufferedReader.readLine();
-                        System.out.println(msgFromGroupChat);
-                    } catch (IOException e) {
-                        closeEverything(socket, bufferedReader, bufferedWriter);
-                    }
-                }
-            }
-        }).start();
-    }
-
-    public void closeEverything(Socket socket, BufferedReader bufferedReader, BufferedWriter bufferedWriter) {
+    public void close() {
         try {
-            if (bufferedReader != null)
+            if (this.bufferedReader != null)
                 bufferedReader.close();
-            if (bufferedWriter != null)
+            if (this.bufferedWriter != null)
                 bufferedWriter.close();
-            if (socket != null)
-                socket.close();
+            if (this.socket != null)
+                this.socket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

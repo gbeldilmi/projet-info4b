@@ -12,6 +12,7 @@ public class FileOperation {
 		String str;
 		int c;
 
+		array.add(new File(path).getName());
 		str = "";
 		try (FileInputStream in = new FileInputStream(path)) {
 			while ((c = in.read()) != -1) {
