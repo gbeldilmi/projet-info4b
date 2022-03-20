@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import corewar.utils.API;
 
 public class Client {
     private Socket socket;

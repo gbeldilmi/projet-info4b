@@ -32,5 +32,4 @@ public class API {
             request = request + API.SEP + lines.get(i);
         return request;
     }
-
 }
