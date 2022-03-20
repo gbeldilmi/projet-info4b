@@ -52,15 +52,12 @@ public class Server {
 
         this.echo(username, request, false);
         switch (API.callType(request)) {
-            case "username":
-                response = checkUsername(request);
-                break;
-            case "warrior":
-                response = addWarrior(request, username);
-                break;
+            case API.USERNAME:
+                response = checkUsername(request); break;
+            case API.WARRIOR:
+                response = addWarrior(request, username); break;
             default:
-                response = API.errorCode();
-                break;
+                response = API.ERROR; break;
         }
         this.echo(username, response, true);
         return response;
@@ -70,22 +67,22 @@ public class Server {
         String username = API.apiCallArray(request)[1];
         for (ClientHandler clientHandler : this.clientHandlers) {
             if (clientHandler.getClientUsername() != null && clientHandler.getClientUsername().equals(username))
-                return API.errorCode();
+                return API.ERROR;
         }
-        return API.validCode();
+        return API.OK;
     }
 
     private String addWarrior(String request, String username) {
         String[] requestArray = API.apiCallArray(request);
         String[] program = new String[requestArray.length - 2];
         
+        if (requestArray.length <= 2)
+            return API.ERROR;
         this.warriorName.add(requestArray[1]);
         this.warriorOwner.add(username);
-        if (requestArray.length <= 2)
-            return API.errorCode();
         for (int i = 2; i < requestArray.length; i++)
             program[i - 2] = requestArray[i];
         this.warriors.add(new Warrior(this.warriors.size(), program));
-        return API.validCode();
+        return API.OK;
     }
 }

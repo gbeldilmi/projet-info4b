@@ -39,7 +39,7 @@ public class ClientHandler implements Runnable {
             try {
                 request = this.bufferedReader.readLine();
                 response = server.response(this.clientUsername, request);
-                if (API.callType(request).equals("username") && API.valid(response))
+                if (API.callType(request).equals(API.USERNAME) && API.valid(response))
                     this.clientUsername = API.apiCallArray(request)[1];
                 this.send(response);
             } catch (Exception e) {

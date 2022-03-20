@@ -3,58 +3,33 @@ package corewar.utils;
 import java.util.ArrayList;
 
 public class API {
-    private static String sep = "%";
-    private static String error = "0";
-    private static String ok = "1";
-    private static String username = "2";
-    private static String warrior = "3";
+    public static final String SEP = "%";
+    public static final String ERROR = "error";
+    public static final String OK = "ok";
+    public static final String USERNAME = "username";
+    public static final String WARRIOR = "warrior";
 
     public static String[] apiCallArray(String apiCall) {
-        return apiCall.split(API.sep);
-    }
-
-    public static String errorCode() {
-        return API.error;
-    }
-
-    public static String validCode() {
-        return API.ok;
+        return apiCall.split(API.SEP);
     }
 
     public static boolean valid(String apiCall) {
-        return apiCall.split(API.sep)[0].equals(API.ok);
+        return apiCall.split(API.SEP)[0].equals(API.OK);
     }
 
     public static String callType(String apiCall) {
-        String callType = null;
-        switch (apiCall.split(API.sep)[0]) {
-            case "0":
-                callType = "error";
-                break;
-            case "1":
-                callType = "ok";
-                break;
-            case "2":
-                callType = "username";
-                break;
-            case "3":
-                callType = "warrior";
-                break;
-            default:
-                break;
-        }
-        return callType;
+        return apiCall.split(API.SEP)[0];
     }
 
     public static String newUsernameRequest(String username) {
-        return API.username+ API.sep + username;
+        return API.USERNAME + API.SEP + username;
     }
     
     public static String newWarriorRequest(ArrayList<String> lines) {
-        String request = API.warrior + API.sep + lines.get(0);
+        String request = API.WARRIOR + API.SEP + lines.get(0);
 
         for (int i = 1; i < lines.size(); i++)
-            request = request + API.sep + lines.get(i);
+            request = request + API.SEP + lines.get(i);
         return request;
     }
 

@@ -9,6 +9,9 @@ import java.io.File;
 
 public class Main {
     public static void main(String[] args) throws IOException {
+        // #############################################
+        // MAIN TEMPORAIRE TEST CLIENT SERVEUR !!!!!!!!!
+        // #############################################
         Socket socket = new Socket("localhost", 1234);
         Client client = new Client(socket);
         String response;
