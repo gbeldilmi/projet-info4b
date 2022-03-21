@@ -13,7 +13,7 @@ public enum OpCode {
   }
 
   public static OpCode getOpCode(int code) {
-    return OpCode.values()[code % (OpCode.values().length)];
+    return OpCode.values()[((int) Math.abs(code)) % (OpCode.values().length)];
   }
 
   public int getCode() {

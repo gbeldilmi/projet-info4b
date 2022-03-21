@@ -10,7 +10,7 @@ public class Mars extends Thread {
   private Warrior[] warriors;
   private Core[] memory;
   
-  Mars(Warrior[] warriors) throws RuntimeException {
+  public Mars(Warrior[] warriors) throws RuntimeException {
     if (warriors.length < 2) {
       throw new RuntimeException("It is not possible to play a game with less than 2 warriors.");
     } else {
@@ -122,7 +122,7 @@ public class Mars extends Thread {
       warriors[i].setPosition(i * j);
     }
     for (i = 0; i < memory.length; i++) {
-      memory[i] = new Core(i, -1);
+      memory[i] = new Core(0, -1);
     }
     for (i = 0; i < warriors.length; i++) {
       p = warriors[i].getProgram();
