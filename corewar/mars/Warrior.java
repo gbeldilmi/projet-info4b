@@ -1,13 +1,15 @@
 package corewar.mars;
 
+import corewar.mars.redcode.Compiler;
+
 public class Warrior {
-  private String[] program;
+  private Core[] program;
   private int id, position, rank;
   private boolean alive;
 
-  public Warrior(int id, String[] program) {
+  public Warrior(int id, String[] program) throws RuntimeException {
     this.id = id;
-    this.program = program.length > 0 ? program : new String[] { "DAT 0 0" };
+    this.program = Compiler.compile(program, id);
     position = 0;
     rank = 0;
     alive = true;
@@ -32,7 +34,7 @@ public class Warrior {
     return position;
   }
 
-  public String[] getProgram() {
+  public Core[] getProgram() {
     return program;
   }
 
@@ -40,9 +42,9 @@ public class Warrior {
     return alive;
   }
 
-  public void programFlush() {
+  /*public void programFlush() {
     program = null;
-  }
+  }//*/
 
   public void setPosition(int position) {
     this.position = position;

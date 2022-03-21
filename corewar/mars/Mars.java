@@ -1,6 +1,7 @@
 package corewar.mars;
 
 import corewar.mars.redcode.AddressMode;
+import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.Compiler;
 import corewar.mars.redcode.Core;
 import corewar.mars.redcode.OpCode;
@@ -18,11 +19,40 @@ public class Mars extends Thread {
     }
   }
 
-  public void execute(Warrior warrior) throws RuntimeException {
-    ////
+  public void execute(Warrior warrior) {
+    if (warrior.isAlive()) {
+      switch (memory[warrior.getPosition()].getOpCode()) {
+        case MOV:
+          //
+          break;
+        case ADD:
+          //
+          break;
+        case SUB:
+          //
+          break;
+        case JMP:
+          //
+          break;
+        case JMZ:
+          //
+          break;
+        case JMG:
+          //
+          break;
+        case DJZ:
+          //
+          break;
+        case CMP:
+          //
+          break;
+        default:
+          warrior.die(countAliveWarriors());
+      }
+    }
   }
 
-  private boolean checkGameOver() {
+  private boolean isGameOver() {
     if (countAliveWarriors() > 1) {
       return false;
     } else {
@@ -45,23 +75,31 @@ public class Mars extends Thread {
     return count;
   }
 
+  private long getTargetValue(int position, AddressMode mode, int arg) {
+    if (mode != AddressMode.INDIRECT) {
+      return (mode == AddressMode.IMMEDIATE) ? arg : position + arg;
+    }
+    return memory[(position + arg) % memory.length].getValue();
+  }
+
   public Warrior[] getWarriors() {
     return warriors;
   }
 
-  private void initMemory() throws RuntimeException {
+  private void initMemory() {
     Core p[];
-    int i, j;
+    int i, j, k;
     for (i = 0; i < warriors.length; i++) {
-      p = Compiler.compile(warriors[i].getProgram(), warriors[i].getId());
-      for (j = 0; j < warriors[i].getProgram().length; j++) {
-        memory[warriors[i].getPosition() + j] = p[j];
+      p = warriors[i].getProgram();
+      k = warriors[i].getPosition();
+      for (j = 0; j < p.length; j++) {
+        memory[k + j] = p[j];
       }
     }
   }
 
-  public void run() throws RuntimeException {
-    while (!checkGameOver()) {
+  public void run() {
+    while (!isGameOver()) {
       for (Warrior warrior : warriors) {
         execute(warrior);
       }

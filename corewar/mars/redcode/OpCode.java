@@ -3,13 +3,13 @@ package corewar.mars.redcode;
 public enum OpCode {
   DAT, MOV, ADD, SUB, JMP, JMZ, JMG, DJZ, CMP;
 
-  public static OpCode getOpCode(String mnemonic) {
+  public static OpCode getOpCode(String mnemonic) throws RuntimeException {
     for (OpCode op : OpCode.values()) {
       if (op.name().equals(mnemonic)) {
         return op;
       }
     }
-    return DAT;
+    throw new RuntimeException("Unknown opcode: " + mnemonic);
   }
 
   public static OpCode getOpCode(int code) {

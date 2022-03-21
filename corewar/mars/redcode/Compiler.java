@@ -1,53 +1,63 @@
 package corewar.mars.redcode;
 
 import corewar.mars.redcode.Core;
-import corewar.utils.Char;
 
 public class Compiler {
-  public static Core[] compile(String[] program, int ownerId) {
+  public static Core[] compile(String[] program, int ownerId) throws RuntimeException {
     int i, valueArg1, valueArg2;
     String[] instruction;
     OpCode opCode;
     AddressMode addressModeArg1, addressModeArg2;
-    Core[] compiledProgram = new Core[program.length * 3];
+    Core[] compiledProgram;
+    if (program.length == 0) {
+      throw new RuntimeException("Empty program.");
+    }
+    compiledProgram = new Core[program.length];
     for (i = 0; i < program.length; i++) {
+      addressModeArg1 = addressModeArg2 = AddressMode.getAddressMode(0);
+      valueArg1 = valueArg2 = 0;
       instruction = program[i].split(" ");
       try {
         opCode = OpCode.getOpCode(instruction[0]);
       } catch (Exception e) {
-        opCode = OpCode.DAT;
+        throw new RuntimeException(e.toString() + " @" + (i + 1));
       }
-      try {
-        addressModeArg1 = AddressMode.getAddressMode(instruction[1]);
-      } catch (Exception e) {
-        addressModeArg1 = AddressMode.INDIRECT;
+      switch (opCode) {
+        case DAT:
+          if (instruction.length != 2) {
+            throw new RuntimeException("Invalid number of arguments for DAT @" + (i + 1));
+          }
+          try {
+            valueArg2 = Integer.parseInt(instruction[1]);
+          } catch (Exception e) {
+            throw new RuntimeException("Invalid argument for DAT @" + (i + 1));
+          }
+          break;
+        case JMP:
+          if (instruction.length != 2) {
+            throw new RuntimeException("Invalid number of arguments for JMP @" + (i + 1));
+          }
+          try {
+            addressModeArg1 = AddressMode.getAddressMode(instruction[1]);
+            valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
+          } catch (Exception e) {
+            throw new RuntimeException("Invalid argument for JMP @" + (i + 1));
+          }
+          break;
+        default:
+          if (instruction.length != 3) {
+            throw new RuntimeException("Invalid number of arguments for " + opCode.toString() + " @" + (i + 1));
+          }
+          try {
+            addressModeArg1 = AddressMode.getAddressMode(instruction[1]);
+            valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
+            addressModeArg2 = AddressMode.getAddressMode(instruction[2]);
+            valueArg2 = (addressModeArg2 == AddressMode.DIRECT) ? Integer.parseInt(instruction[2]) : Integer.parseInt(instruction[2].substring(1));
+          } catch (Exception e) {
+            throw new RuntimeException("Invalid argument for " + opCode.toString() + " @" + (i + 1));
+          }
       }
-      try {
-        addressModeArg2 = AddressMode.getAddressMode(instruction[2]);
-      } catch (Exception e) {
-        addressModeArg2 = AddressMode.INDIRECT;
-      }
-      try {
-        if (Char.isDigit(instruction[1].charAt(0)) || instruction[1].charAt(0) == '-') {
-          valueArg1 = Integer.parseInt(instruction[1]);
-        } else {
-          valueArg1 = Integer.parseInt(instruction[1].substring(1));
-        }
-      } catch (Exception e) {
-        valueArg1 = 0;
-      }
-      try {
-        if (Char.isDigit(instruction[2].charAt(0)) || instruction[2].charAt(0) == '-') {
-          valueArg2 = Integer.parseInt(instruction[2]);
-        } else {
-          valueArg2 = Integer.parseInt(instruction[2].substring(1));
-        }
-      } catch (Exception e) {
-        valueArg2 = 0;
-      }
-      compiledProgram[i * 3] = new Core((opCode.getCode() << 4) + (addressModeArg1.getCode() << 2) + addressModeArg2.getCode(), ownerId);
-      compiledProgram[i * 3 + 1] = new Core(valueArg1, ownerId);
-      compiledProgram[i * 3 + 2] = new Core(valueArg2, ownerId);
+      compiledProgram[i] = new Core(opCode, addressModeArg1, addressModeArg2, valueArg1, valueArg2, ownerId);
     }
     return compiledProgram;
   }

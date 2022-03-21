@@ -9,11 +9,11 @@ public enum AddressMode {
         case '#':
           return IMMEDIATE;
         case '@':
-          return DIRECT;
+          return INDIRECT;
         default:
       }
     }
-    return INDIRECT;
+    return DIRECT;
   }
 
   public static AddressMode getAddressMode(int code) {
@@ -28,7 +28,7 @@ public enum AddressMode {
     switch (this) {
       case IMMEDIATE:
         return "#";
-      case DIRECT:
+      case INDIRECT:
         return "@";
       default:
         return "";

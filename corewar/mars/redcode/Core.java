@@ -1,38 +1,54 @@
 package corewar.mars.redcode;
 
 public class Core {
-  private static final int MAX_VALUE = 2147483647, MIN_VALUE = -(MAX_VALUE + 1);
-  private int owner, value;
+  private int owner;
+  private long value;
 
   public Core() {
     this(0, -1);
   }
 
-  public Core(int value, int owner) {
+  public Core(OpCode opCode, AddressMode addressModeArg1, AddressMode addressModeArg2, int arg1, int arg2, int owner) {
+    this(((opCode.getCode() & 0x0F) << 60) + ((addressModeArg1.getCode() & 0b0011) << 58) + ((addressModeArg2.getCode() & 0b0011) << 56) + ((arg1 & 0x0FFFFFFF) << 28) + (arg2 & 0x0FFFFFFF), owner);
+  }
+
+  public Core(long value, int owner) {
     set(value, owner);
   }
 
+  public Core add(Core core) {
+    return new Core(value + core.getValue(), owner);
+  }
+
+  public int getArg1() {
+    return (int) (value >> 28) & 0x0FFFFFFF;
+  }
+
+  public int getArg2() {
+    return (int) value & 0x0FFFFFFF;
+  }
+
   public AddressMode getAddressModeArg1() {
-    return AddressMode.getAddressMode(value & 0b1100);
+    return AddressMode.getAddressMode((int) (value >> 58) & 0b11);
   }
 
   public AddressMode getAddressModeArg2() {
-    return AddressMode.getAddressMode(value & 0b0011);
+    return AddressMode.getAddressMode((int) (value >> 56) & 0b11);
   }
 
   public OpCode getOpCode() {
-    return OpCode.getOpCode(value >> 4);
+    return OpCode.getOpCode((int) value >> 60);
   }
 
   public int getOwner() {
     return owner;
   }
 
-  public int getValue() {
+  public long getValue() {
     return value;
   }
 
-  public void set(int value, int owner) {
+  public void set(long value, int owner) {
     setOwner(owner);
     setValue(value);
   }
@@ -41,11 +57,15 @@ public class Core {
     this.owner = owner;
   }
 
-  private void setValue(int value) {
+  private void setValue(long value) {
     this.value = value;
   }
 
+  public Core sub(Core core) {
+    return new Core(value - core.getValue(), owner);
+  }
+
   public String toString() {
-    return Integer.toHexString(value);
+    return Long.toHexString(value);
   }
 }
