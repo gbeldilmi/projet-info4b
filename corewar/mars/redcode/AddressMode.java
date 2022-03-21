@@ -3,17 +3,15 @@ package corewar.mars.redcode;
 public enum AddressMode {
   IMMEDIATE, DIRECT, INDIRECT;
 
-  public static AddressMode getAddressMode(String arg) {
-    if (arg.length() >= 1) {
-      switch (arg.charAt(0)) {
-        case '#':
-          return IMMEDIATE;
-        case '@':
-          return INDIRECT;
-        default:
-      }
+  public static AddressMode getAddressMode(char c) {
+    switch (c) {
+      case '#':
+        return IMMEDIATE;
+      case '@':
+        return INDIRECT;
+      default:
+        return DIRECT;
     }
-    return DIRECT;
   }
 
   public static AddressMode getAddressMode(int code) {

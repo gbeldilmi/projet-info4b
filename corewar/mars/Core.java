@@ -59,7 +59,7 @@ public class Core {
   }
 
   public OpCode getOpCode() {
-    return OpCode.getOpCode((int) value >> 60);
+    return OpCode.getOpCode((int) value >> 60 & 0b1111);
   }
 
   public int getOwner() {
@@ -88,6 +88,6 @@ public class Core {
   }
 
   public String toString() {
-    return Long.toHexString(value);
+    return getOpCode().toString() + " " + getAddressModeArg1().toString() + getArg1() + " " + getAddressModeArg2().toString() + getArg2() + " [" + Long.toBinaryString(value);
   }
 }

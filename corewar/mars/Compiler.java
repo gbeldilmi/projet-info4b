@@ -40,7 +40,7 @@ public class Compiler {
             throw new RuntimeException("Invalid number of arguments for JMP @" + (i + 1));
           }
           try {
-            addressModeArg1 = AddressMode.getAddressMode(instruction[1]);
+            addressModeArg1 = AddressMode.getAddressMode(instruction[1].charAt(0));
             valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
           } catch (Exception e) {
             throw new RuntimeException("Invalid argument for JMP @" + (i + 1));
@@ -51,9 +51,9 @@ public class Compiler {
             throw new RuntimeException("Invalid number of arguments for " + opCode.toString() + " @" + (i + 1));
           }
           try {
-            addressModeArg1 = AddressMode.getAddressMode(instruction[1]);
+            addressModeArg1 = AddressMode.getAddressMode(instruction[1].charAt(0));
             valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
-            addressModeArg2 = AddressMode.getAddressMode(instruction[2]);
+            addressModeArg2 = AddressMode.getAddressMode(instruction[2].charAt(0));
             valueArg2 = (addressModeArg2 == AddressMode.DIRECT) ? Integer.parseInt(instruction[2]) : Integer.parseInt(instruction[2].substring(1));
           } catch (Exception e) {
             throw new RuntimeException("Invalid argument for " + opCode.toString() + " @" + (i + 1));
