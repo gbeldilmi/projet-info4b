@@ -6,6 +6,7 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
+  private final boolean DEBUG = true;
   private Warrior[] warriors;
   private Core[] memory;
   
@@ -19,31 +20,47 @@ public class Mars extends Thread {
   }
 
   public void execute(Warrior warrior) {
+    Core core;
+    int position;
     if (warrior.isAlive()) {
-      switch (memory[warrior.getPosition()].getOpCode()) {
+      position = warrior.getPosition();
+      core = memory[position];
+      if (DEBUG) {
+        System.out.println(">> Warrior " + warrior.getId() + " @" + position + ": " + core);
+        System.out.println(this);
+      }
+      switch (core.getOpCode()) {
         case MOV:
-          //
+          memory[(int) getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()) % memory.length] = new Core(getTargetValue(position, core.getAddressModeArg1(), core.getArg1()), warrior.getId());
           break;
         case ADD:
-          //
+          memory[(int) getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()) % memory.length].add(memory[(int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length], warrior.getId());
           break;
         case SUB:
-          //
+          memory[(int) getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()) % memory.length].sub(memory[(int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length], warrior.getId());
           break;
         case JMP:
-          //
+          warrior.setPosition((int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length);
           break;
         case JMZ:
-          //
+          if (getTargetValue(position, core.getAddressModeArg2(), core.getArg2()) == 0) {
+            warrior.setPosition((int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length);
+          }
           break;
         case JMG:
-          //
+          if (getTargetValue(position, core.getAddressModeArg2(), core.getArg2()) > 0) {
+            warrior.setPosition((int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length);
+          }
           break;
         case DJZ:
-          //
+          if (memory[(int) getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()) % memory.length].decrement(warrior.getId())) {
+            warrior.setPosition((int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length);
+          }
           break;
         case CMP:
-          //
+          if (getTargetValue(position, core.getAddressModeArg1(), core.getArg1()) == getTargetValue(position, core.getAddressModeArg1(), core.getArg1())) {
+            warrior.setPosition((int) getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()) % memory.length);
+          }
           break;
         default:
           warrior.die(countAliveWarriors());
@@ -74,11 +91,16 @@ public class Mars extends Thread {
     return count;
   }
 
-  private long getTargetValue(int position, AddressMode mode, int arg) {
+  private long getTargetAddress(int position, AddressMode mode, int arg) {
     if (mode != AddressMode.INDIRECT) {
       return (mode == AddressMode.IMMEDIATE) ? arg : position + arg;
     }
     return memory[(position + arg) % memory.length].getValue();
+  }
+
+  private long getTargetValue(int position, AddressMode mode, int arg) {
+    long targetAddress = getTargetAddress(position, mode, arg);
+    return (mode == AddressMode.IMMEDIATE) ? targetAddress : memory[(int) targetAddress % memory.length].getValue();
   }
 
   public Warrior[] getWarriors() {
@@ -88,6 +110,20 @@ public class Mars extends Thread {
   private void initMemory() {
     Core p[];
     int i, j, k;
+    for (i = j = 0; i < warriors.length; i++) {
+      k = warriors[i].getProgram().length;
+      if (k > j) {
+        j = k;
+      }
+    }
+    j *= 2;
+    memory = new Core[j * warriors.length];
+    for (i = 0; i < warriors.length; i++) {
+      warriors[i].setPosition(i * j);
+    }
+    for (i = 0; i < memory.length; i++) {
+      memory[i] = new Core(i, -1);
+    }
     for (i = 0; i < warriors.length; i++) {
       p = warriors[i].getProgram();
       k = warriors[i].getPosition();
@@ -107,9 +143,8 @@ public class Mars extends Thread {
 
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    for (Core c : memory) {
-      sb.append(c.toString());
-      sb.append(" ");
+    for (int i = 0; i < memory.length; i++) {
+      sb.append(i + ". " + memory[i].toString() + "\n");
     }
     return sb.toString();
   }

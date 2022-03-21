@@ -12,23 +12,42 @@ public class Core {
   }
 
   public Core(OpCode opCode, AddressMode addressModeArg1, AddressMode addressModeArg2, int arg1, int arg2, int owner) {
-    this(((opCode.getCode() & 0x0F) << 60) + ((addressModeArg1.getCode() & 0b0011) << 58) + ((addressModeArg2.getCode() & 0b0011) << 56) + ((arg1 & 0x0FFFFFFF) << 28) + (arg2 & 0x0FFFFFFF), owner);
+    long value = 0;
+    value |= (opCode.getCode() & 0x0F) << 60;
+    value |= (addressModeArg1.getCode() & 0b0011) << 58;
+    value |= (addressModeArg2.getCode() & 0b0011) << 56;
+    value |= (arg1 & 0x0FFFFFFF) << 28;
+    if (arg1 < 0) {
+      value |= 0x080000000 << 28;
+    }
+    value |= (arg2 & 0x0FFFFFFF);
+    if (arg2 < 0) {
+      value |= 0x080000000;
+    }
+    set(value, owner);
   }
 
   public Core(long value, int owner) {
     set(value, owner);
   }
 
-  public Core add(Core core) {
-    return new Core(value + core.getValue(), owner);
+  public void add(Core core, int owner) {
+    set(value + core.getValue(), owner);
+  }
+
+  public boolean decrement(int owner) {
+    set(value - 1, owner);
+    return getValue() == 0;
   }
 
   public int getArg1() {
-    return (int) (value >> 28) & 0x0FFFFFFF;
+    int r = (int) (value >> 28) & 0x0FFFFFFF;
+    return (r & 0x080000000) == 0 ? r : -r;
   }
 
   public int getArg2() {
-    return (int) value & 0x0FFFFFFF;
+    int r = (int) value & 0x0FFFFFFF;
+    return (r & 0x080000000) == 0 ? r : -r;
   }
 
   public AddressMode getAddressModeArg1() {
@@ -64,8 +83,8 @@ public class Core {
     this.value = value;
   }
 
-  public Core sub(Core core) {
-    return new Core(value - core.getValue(), owner);
+  public void sub(Core core, int owner) {
+    set(value - core.getValue(), owner);
   }
 
   public String toString() {
