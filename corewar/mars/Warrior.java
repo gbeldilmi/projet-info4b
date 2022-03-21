@@ -10,7 +10,7 @@ public class Warrior {
 
   public Warrior(int id, String[] program) throws RuntimeException {
     this.id = id;
-    this.program = Compiler.compile(program, id);
+    this.program = Compiler.compile(program);
     position = 0;
     rank = 0;
     alive = true;
@@ -43,6 +43,9 @@ public class Warrior {
     return alive;
   }
 
+  public void next(int max) {
+    position = (position + 1) % max;
+  }
   /*public void programFlush() {
     program = null;
   }//*/

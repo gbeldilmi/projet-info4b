@@ -4,90 +4,77 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Core {
-  private int owner;
-  private long value;
+  public static final int MAX_VALUE = 0x0FFF;
+  private int value;
 
   public Core() {
-    this(0, -1);
+    this(0);
   }
 
-  public Core(OpCode opCode, AddressMode addressModeArg1, AddressMode addressModeArg2, int arg1, int arg2, int owner) {
-    long value = 0;
-    value |= (opCode.getCode() & 0x0F) << 60;
-    value |= (addressModeArg1.getCode() & 0b0011) << 58;
-    value |= (addressModeArg2.getCode() & 0b0011) << 56;
-    value |= (arg1 & 0x0FFFFFFF) << 28;
+  public Core(OpCode opCode, AddressMode addressModeArg1, AddressMode addressModeArg2, int arg1, int arg2) {
+    this();
+    value |= (opCode.getCode() & 0x0F) << 28;
+    value |= (addressModeArg1.getCode() & 0x03) << 26;
+    value |= (addressModeArg2.getCode() & 0x03) << 24;
+    value |= (arg1 & 0x0FFF) << 12;
     if (arg1 < 0) {
-      value |= 0x080000000 << 28;
+      value |= 0x0800 << 12;
     }
-    value |= (arg2 & 0x0FFFFFFF);
+    value |= (arg2 & 0x0FFF);
     if (arg2 < 0) {
-      value |= 0x080000000;
+      value |= 0x0800;
     }
-    set(value, owner);
+    setValue(value);
   }
 
-  public Core(long value, int owner) {
-    set(value, owner);
+  public Core(int value) {
+    setValue(value);
   }
 
-  public void add(Core core, int owner) {
-    set(value + core.getValue(), owner);
+  public void add(Core core) {
+    setValue(value + core.getValue());
   }
 
-  public boolean decrement(int owner) {
-    set(value - 1, owner);
+  public boolean decrement() {
+    setValue(value - 1);
     return getValue() == 0;
   }
 
   public int getArg1() {
-    int r = (int) (value >> 28) & 0x0FFFFFFF;
-    return (r & 0x080000000) == 0 ? r : -r;
+    int r = (value >> 12) & 0x0FFF;
+    return (r & 0x0800) == 0 ? r : -r;
   }
 
   public int getArg2() {
-    int r = (int) value & 0x0FFFFFFF;
-    return (r & 0x080000000) == 0 ? r : -r;
+    int r = value & 0x0FFF;
+    return (r & 0x0800) == 0 ? r : -r;
   }
 
   public AddressMode getAddressModeArg1() {
-    return AddressMode.getAddressMode((int) (value >> 58) & 0b11);
+    return AddressMode.getAddressMode((value >> 26) & 0x03);
   }
 
   public AddressMode getAddressModeArg2() {
-    return AddressMode.getAddressMode((int) (value >> 56) & 0b11);
+    return AddressMode.getAddressMode((value >> 24) & 0x03);
   }
 
   public OpCode getOpCode() {
-    return OpCode.getOpCode((int) value >> 60 & 0b1111);
+    return OpCode.getOpCode(value >> 28 & 0x0F);
   }
 
-  public int getOwner() {
-    return owner;
-  }
-
-  public long getValue() {
+  public int getValue() {
     return value;
   }
 
-  public void set(long value, int owner) {
-    setOwner(owner);
-    setValue(value);
-  }
-
-  private void setOwner(int owner) {
-    this.owner = owner;
-  }
-
-  private void setValue(long value) {
+  private void setValue(int value) {
     this.value = value;
   }
 
-  public void sub(Core core, int owner) {
-    set(value - core.getValue(), owner);
+  public void sub(Core core) {
+    setValue(value - core.getValue());
   }
 
   public String toString() {
-    return getOpCode().toString() + " " + getAddressModeArg1().toString() + getArg1() + " " + getAddressModeArg2().toString() + getArg2() + " [" + Long.toBinaryString(value);
+    return getOpCode().toString() + " " + getAddressModeArg1().toString() + getArg1() + " " + getAddressModeArg2().toString() + getArg2() + " [" + Integer.toBinaryString(value);
   }
 }
