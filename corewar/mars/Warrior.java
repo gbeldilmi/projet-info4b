@@ -1,6 +1,7 @@
 package corewar.mars;
 
-import corewar.mars.redcode.Compiler;
+import corewar.mars.Compiler;
+import corewar.mars.Core;
 
 public class Warrior {
   private Core[] program;

@@ -1,9 +1,8 @@
 package corewar.mars;
 
+import corewar.mars.Compiler;
+import corewar.mars.Core;
 import corewar.mars.redcode.AddressMode;
-import corewar.mars.redcode.AddressMode;
-import corewar.mars.redcode.Compiler;
-import corewar.mars.redcode.Core;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {

@@ -1,6 +1,8 @@
-package corewar.mars.redcode;
+package corewar.mars;
 
-import corewar.mars.redcode.Core;
+import corewar.mars.Core;
+import corewar.mars.redcode.AddressMode;
+import corewar.mars.redcode.OpCode;
 
 public class Compiler {
   public static Core[] compile(String[] program, int ownerId) throws RuntimeException {

@@ -1,4 +1,7 @@
-package corewar.mars.redcode;
+package corewar.mars;
+
+import corewar.mars.redcode.AddressMode;
+import corewar.mars.redcode.OpCode;
 
 public class Core {
   private int owner;
