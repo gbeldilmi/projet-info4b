@@ -49,4 +49,18 @@ public class UI {
         System.out.print("Pseudo >> ");
         return Read.S();
     }
+
+    public static String gameLoopMenu(boolean warriorUploaded) {
+        String choice;
+
+        reset();
+        System.out.println("1 : " + (!warriorUploaded ? "uploader un warrior" : "lancer partie"));
+        System.out.println("2 : afficher le classement");
+        System.out.println("3 : quitter");
+        do {
+            System.out.print(">> ");
+            choice = Read.S();
+        } while (!choice.equals("1") && !choice.equals("2") && !choice.equals("3"));
+        return choice;
+    }
 }

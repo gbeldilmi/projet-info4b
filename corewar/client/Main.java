@@ -19,6 +19,9 @@ public class Main {
         boolean running = true;
         String response;
         String username;
+        boolean warriorUploaded = false;
+        boolean startGame = false;
+        String choice;
 
         //  Connexion du client au serveur
         while (!socket.isConnected()) {
@@ -36,7 +39,30 @@ public class Main {
         client.setUsername(username);
 
         while (running) {
-            // à faire
+            choice = UI.gameLoopMenu(warriorUploaded);
+            switch (choice) {
+                case "1":
+                    if (!warriorUploaded) {
+                        System.out.println("upload warrior");
+                        //  upload warrior
+                        warriorUploaded = true;
+                    } else
+                        startGame = true;
+                    break;
+                case "2":
+                    System.out.println("classement");
+                    //  requete classement
+                    break;
+                case "3":
+                    client.close();
+                    System.exit(0);
+                default:
+                    break;
+            }
+            while (startGame) {
+                UI.reset();
+                System.out.println("lancement jeu...");
+            }
         }
 
         /*
