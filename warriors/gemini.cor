@@ -1,3 +1,4 @@
+JMP 3
 DAT 0
 DAT 99
 MOV @-2 @-1

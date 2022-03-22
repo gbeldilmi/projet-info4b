@@ -26,8 +26,16 @@ public class Mars extends Thread {
       position = warrior.getPosition();
       core = memory[getIndex(position)];
       if (DEBUG) {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
         System.out.println(">> Warrior " + warrior.getId() + " @" + position + ": " + core);
         System.out.println(this);
+        //*
+        try {
+          Thread.sleep(100);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }//*/
       }
       switch (core.getOpCode()) {
         case MOV:
@@ -113,12 +121,12 @@ public class Mars extends Thread {
     if (mode != AddressMode.INDIRECT) {
       return (mode == AddressMode.IMMEDIATE) ? arg : position + arg;
     }
-    return memory[(position + arg) % memory.length].getValue();
+    return memory[getIndex(position + arg)].getValue();
   }
 
   private int getTargetValue(int position, AddressMode mode, int arg) {
     int targetAddress = getTargetAddress(position, mode, arg);
-    return (mode == AddressMode.IMMEDIATE) ? targetAddress : memory[targetAddress % memory.length].getValue();
+    return (mode == AddressMode.IMMEDIATE) ? targetAddress : memory[getIndex(targetAddress)].getValue();
   }
 
   public Warrior[] getWarriors() {
