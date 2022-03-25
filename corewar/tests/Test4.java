@@ -22,7 +22,7 @@ public class Test4 {
         "MOV #99 93",
         "JMP 93"
       }),//*/
-      /*new Warrior(3, new String[] {
+      new Warrior(3, new String[] {
         "JMP 2",
         "DAT -1",
         "ADD #5 -1",

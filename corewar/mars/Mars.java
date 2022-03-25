@@ -8,6 +8,7 @@ import corewar.mars.redcode.OpCode;
 public class Mars extends Thread {
   private final boolean DEBUG = true;
   private final long MAX_CYCLE = 1000000;
+  private final int MIN_WARRIOR_SIZE = 32;
   private Warrior[] warriors;
   private Core[] memory;
   private long cycle;
@@ -29,16 +30,8 @@ public class Mars extends Thread {
       position = warrior.getPosition();
       core = memory[getIndex(position)];
       if (DEBUG) {
-        System.out.print("\033[H\033[2J");
-        System.out.flush();
-        System.out.println(">> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
+        System.out.println("\n\n>> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
         System.out.println(this);
-        /*
-        try {
-          Thread.sleep(100);
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }//*/
       }
       switch (core.getOpCode()) {
         case MOV:
@@ -145,7 +138,9 @@ public class Mars extends Thread {
         j = k;
       }
     }
-    j *= 2;
+    if ((j *= 2) < MIN_WARRIOR_SIZE) {
+      j = MIN_WARRIOR_SIZE;
+    }
     memory = new Core[j * warriors.length];
     for (i = 0; i < warriors.length; i++) {
       warriors[i].setPosition(i * j);
