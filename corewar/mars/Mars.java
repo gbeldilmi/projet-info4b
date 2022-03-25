@@ -7,13 +7,16 @@ import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
   private final boolean DEBUG = true;
+  private final long MAX_CYCLE = 1000000;
   private Warrior[] warriors;
   private Core[] memory;
+  private long cycle;
   
   public Mars(Warrior[] warriors) throws RuntimeException {
     if (warriors.length < 2) {
       throw new RuntimeException("It is not possible to play a game with less than 2 warriors.");
     } else {
+      cycle = 0;
       this.warriors = warriors;
       initMemory();
     }
@@ -28,9 +31,9 @@ public class Mars extends Thread {
       if (DEBUG) {
         System.out.print("\033[H\033[2J");
         System.out.flush();
-        System.out.println(">> Warrior " + warrior.getId() + " @" + position + ": " + core);
+        System.out.println(">> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
         System.out.println(this);
-        //*
+        /*
         try {
           Thread.sleep(100);
         } catch (InterruptedException e) {
@@ -88,7 +91,7 @@ public class Mars extends Thread {
   }
 
   private boolean isGameOver() {
-    if (countAliveWarriors() > 1) {
+    if (countAliveWarriors() > 1 && cycle < MAX_CYCLE) {
       return false;
     } else {
       for (Warrior warrior : warriors) {
@@ -165,6 +168,7 @@ public class Mars extends Thread {
       for (Warrior warrior : warriors) {
         execute(warrior);
       }
+      cycle++;
     }
   }
 
