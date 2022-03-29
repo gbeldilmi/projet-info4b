@@ -31,7 +31,7 @@ public class Compiler {
         try {
           if (opCode == OpCode.JMP) {
             addressModeArg1 = AddressMode.getAddressMode(instruction[1].charAt(0));
-            valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
+            valueArg1 = Integer.parseInt((addressModeArg1 == AddressMode.DIRECT) ? instruction[1] : instruction[1].substring(1));
           } else {
             valueArg2 = Integer.parseInt(instruction[1]);
           }
@@ -44,9 +44,9 @@ public class Compiler {
         }
         try {
           addressModeArg1 = AddressMode.getAddressMode(instruction[1].charAt(0));
-          valueArg1 = (addressModeArg1 == AddressMode.DIRECT) ? Integer.parseInt(instruction[1]) : Integer.parseInt(instruction[1].substring(1));
+          valueArg1 = Integer.parseInt((addressModeArg1 == AddressMode.DIRECT) ? instruction[1] : instruction[1].substring(1));
           addressModeArg2 = AddressMode.getAddressMode(instruction[2].charAt(0));
-          valueArg2 = (addressModeArg2 == AddressMode.DIRECT) ? Integer.parseInt(instruction[2]) : Integer.parseInt(instruction[2].substring(1));
+          valueArg2 = Integer.parseInt((addressModeArg2 == AddressMode.DIRECT) ? instruction[2] : instruction[2].substring(1));
         } catch (Exception e) {
           throw new RuntimeException("Invalid argument for " + opCode.toString() + " @" + (i + 1));
         }
