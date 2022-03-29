@@ -4,7 +4,7 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Core {
-  public static final int MAX_VALUE = 0x0FFF;
+  public static final int MAX_ARG_VALUE = 0x0FFF;
   private int value;
 
   public Core() {
@@ -35,19 +35,25 @@ public class Core {
     setValue(value + core.getValue());
   }
 
+  public Core clone() {
+    return new Core(value);
+  }
+
   public boolean decrement() {
     setValue(value - 1);
     return getValue() == 0;
   }
 
   public int getArg1() {
-    int r = (value >> 12) & 0x0FFF;
-    return (r & 0x0800) == 0 ? r : -r;
+    return getArgComplement((value >> 12) & 0x0FFF);
   }
 
   public int getArg2() {
-    int r = value & 0x0FFF;
-    return (r & 0x0800) == 0 ? r : -r;
+    return getArgComplement(value & 0x0FFF);
+  }
+
+  private int getArgComplement(int arg) {
+    return ((arg & 0x0800) != 0) ? arg | 0xFFFFF000 : arg;
   }
 
   public AddressMode getAddressModeArg1() {
