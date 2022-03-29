@@ -9,6 +9,7 @@ import corewar.mars.Warrior;
 public class Server {
     private ServerSocket serverSocket;
     private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
+    private ArrayList<Game> games = new ArrayList<>();
     private ArrayList<Warrior> warriors = new ArrayList<>();
     private ArrayList<String> warriorName = new ArrayList<>();
     private ArrayList<String> warriorOwner = new ArrayList<>();
@@ -72,6 +73,8 @@ public class Server {
         return API.OK;
     }
 
+    // revoir fonction ! ajout warrior possible si joueur dans game
+    // ajout warrior dans game
     private String addWarrior(String request, String username) {
         String[] requestArray = API.apiCallArray(request);
         String[] program = new String[requestArray.length - 2];
@@ -85,4 +88,9 @@ public class Server {
         this.warriors.add(new Warrior(this.warriors.size(), program));
         return API.OK;
     }
+
+    // getGames
+    // newGame
+    // addClientToGame
+    
 }
