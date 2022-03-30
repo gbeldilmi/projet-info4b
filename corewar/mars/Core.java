@@ -35,10 +35,6 @@ public class Core {
     setValue(value + core.getValue());
   }
 
-  public Core clone() {
-    return new Core(value);
-  }
-
   public boolean decrement() {
     setValue(value - 1);
     return getValue() == 0;
@@ -72,7 +68,7 @@ public class Core {
     return value;
   }
 
-  private void setValue(int value) {
+  public void setValue(int value) {
     this.value = value;
   }
 

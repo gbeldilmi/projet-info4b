@@ -6,8 +6,8 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
-  private final boolean DEBUG = true;
-  private final long MAX_CYCLE = 1000000;
+  private final boolean DEBUG = false;
+  private final long MAX_CYCLE = 5000;
   private final int MIN_WARRIOR_SIZE = 32;
   private Warrior[] warriors;
   private Core[] memory;
@@ -24,61 +24,70 @@ public class Mars extends Thread {
   }
 
   public void execute(Warrior warrior) {
-    Core core;
-    int position;
+    Core core, targetCore1, targetCore2;
+    int position, target1, target2;
+    boolean skipNext;
     if (warrior.isAlive()) {
+      skipNext = true;
       position = warrior.getPosition();
       core = memory[getIndex(position)];
+      target1 = getAddress(position, core.getAddressModeArg1(), core.getArg1());
+      target2 = getAddress(position, core.getAddressModeArg2(), core.getArg2());
+      targetCore1 = getCore(target1);
+      targetCore2 = getCore(target2);
       if (DEBUG) {
-        System.out.println("\n\n>> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
+        System.out.println(">> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
         System.out.println(this);
       }
       switch (core.getOpCode()) {
-        case MOV:
-          memory[getIndex(getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()))] = new Core(getTargetValue(position, core.getAddressModeArg1(), core.getArg1()));
-          warrior.next(memory.length);
+        case MOV:          
+          targetCore2.setValue(targetCore1.getValue());
+          skipNext = false;
           break;
         case ADD:
-          memory[getIndex(getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()))].add(memory[getIndex(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()))]);
-          warrior.next(memory.length);
+          targetCore2.add(targetCore1);
+          skipNext = false;
           break;
         case SUB:
-          memory[getIndex(getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()))].sub(memory[getIndex(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()))]);
-          warrior.next(memory.length);
+          targetCore2.sub(targetCore1);
+          skipNext = false;
           break;
         case JMP:
-          warrior.setPosition(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()));
+          warrior.setPosition(getIndex(target1));
           break;
         case JMZ:
-          if (getTargetValue(position, core.getAddressModeArg2(), core.getArg2()) == 0) {
-            warrior.setPosition(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()));
+          if (targetCore2.getValue() == 0) {
+            warrior.setPosition(getIndex(target1));
           } else {
-            warrior.next(memory.length);
+            skipNext = false;
           }
           break;
         case JMG:
-          if (getTargetValue(position, core.getAddressModeArg2(), core.getArg2()) > 0) {
-            warrior.setPosition(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()));
+          if (targetCore2.getValue() > 0) {
+            warrior.setPosition(getIndex(target1));
           } else {
-            warrior.next(memory.length);
+            skipNext = false;
           }
           break;
         case DJZ:
-          if (memory[getIndex(getTargetAddress(position, core.getAddressModeArg2(), core.getArg2()))].decrement()) {
-            warrior.setPosition(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()));
+          if (targetCore2.decrement()) {
+            warrior.setPosition(getIndex(target1));
           } else {
-            warrior.next(memory.length);
+            skipNext = false;
           }
           break;
         case CMP:
-          if (getTargetValue(position, core.getAddressModeArg1(), core.getArg1()) == getTargetValue(position, core.getAddressModeArg1(), core.getArg1())) {
-            warrior.setPosition(getTargetAddress(position, core.getAddressModeArg1(), core.getArg1()));
+          if (targetCore1.getValue() == targetCore2.getValue()) {
+            warrior.setPosition(getIndex(target1));
           } else {
-            warrior.next(memory.length);
+            skipNext = false;
           }
           break;
         default:
           warrior.die(countAliveWarriors());
+      }
+      if (!skipNext) {
+        warrior.next(memory.length);
       }
     }
   }
@@ -106,23 +115,22 @@ public class Mars extends Thread {
     return count;
   }
 
-  private int getIndex(int address) {
-    while (address < 0) {
-      address += memory.length;
-    }
-    return address % memory.length;
-  }
-
-  private int getTargetAddress(int position, AddressMode mode, int arg) {
+  private int getAddress(int position, AddressMode mode, int arg) {
     if (mode != AddressMode.INDIRECT) {
       return (mode == AddressMode.IMMEDIATE) ? arg : position + arg;
     }
     return memory[getIndex(position + arg)].getValue();
   }
 
-  private int getTargetValue(int position, AddressMode mode, int arg) {
-    int targetAddress = getTargetAddress(position, mode, arg);
-    return (mode == AddressMode.IMMEDIATE) ? targetAddress : memory[getIndex(targetAddress)].getValue();
+  private Core getCore(int address) {
+    return memory[getIndex(address)];
+  }
+
+  private int getIndex(int address) {
+    while (address < 0) {
+      address += memory.length;
+    }
+    return address % memory.length;
   }
 
   public Warrior[] getWarriors() {
@@ -154,7 +162,7 @@ public class Mars extends Thread {
       for (j = 0; j < p.length; j++) {
         memory[k + j] = p[j];
       }
-      /*warriors[i].programFlush();//*/
+      //warriors[i].programFlush();
     }
   }
 
