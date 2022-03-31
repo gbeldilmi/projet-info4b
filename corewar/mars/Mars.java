@@ -6,8 +6,8 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
-  private final boolean DEBUG = false;
-  private final long MAX_CYCLE = 5000;
+  private final boolean DEBUG = true;
+  private final long MAX_CYCLE = 10;
   private final int MIN_WARRIOR_SIZE = 32;
   private Warrior[] warriors;
   private Core[] memory;
@@ -98,7 +98,7 @@ public class Mars extends Thread {
     } else {
       for (Warrior warrior : warriors) {
         if (warrior.isAlive()) {
-          warrior.die(0);
+          warrior.die((cycle < MAX_CYCLE) ? 1 : 0);
         }
       }
       return true;
