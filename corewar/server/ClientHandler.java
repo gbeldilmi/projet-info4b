@@ -38,7 +38,7 @@ public class ClientHandler implements Runnable {
         while (this.socket.isConnected()) {
             try {
                 request = this.bufferedReader.readLine();
-                response = server.response(this.clientUsername, request);
+                response = server.response(this, request);
                 if (API.callType(request).equals(API.USERNAME) && API.valid(response))
                     this.clientUsername = API.apiCallArray(request)[1];
                 this.send(response);

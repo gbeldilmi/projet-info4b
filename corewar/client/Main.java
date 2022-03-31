@@ -7,7 +7,6 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 import corewar.utils.FileOperation;
-import java.io.File;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -16,12 +15,13 @@ public class Main {
         // #############################################
         Socket socket = new Socket();
         Client client;
-        boolean running = true;
         String response;
         String username;
         boolean warriorUploaded = false;
         boolean startGame = false;
+        int gameId = -1;
         String choice;
+        int value;
 
         //  Connexion du client au serveur
         while (!socket.isConnected()) {
@@ -38,30 +38,61 @@ public class Main {
             username = UI.usernameChoice("Pseudo déjà prix");
         client.setUsername(username);
 
-        while (running) {
-            choice = UI.gameLoopMenu(warriorUploaded);
+        while (true) {
+            choice = UI.gameLoopMenu();
             switch (choice) {
                 case "1":
-                    if (!warriorUploaded) {
-                        System.out.println("upload warrior");
-                        //  upload warrior
-                        warriorUploaded = true;
-                    } else
-                        startGame = true;
+                    System.out.print("Nombre de joueurs >> ");
+                    response = client.request(API.newGameRequest(Read.i()));
+                    gameId = Integer.parseInt(API.apiCallArray(response)[1]);
+                    System.out.println("Numero de partie : " + gameId);
+                    UI.waiting();
                     break;
                 case "2":
-                    System.out.println("classement");
-                    //  requete classement
+                    System.out.print("Numero de partie >> ");
+                    gameId = Read.i();
+                    response = client.request(API.joinGameRequest(gameId));
+                    if (API.valid(response))
+                        System.out.println("Vous avez rejoint la partie " + gameId + " !");
+                    else {
+                        System.out.println("Numero de partie invalide ou partie complete !");
+                        gameId = -1;
+                    }
+                    UI.waiting();
                     break;
                 case "3":
+                    response = client.request(API.getGamesRequest());
+                    if (API.valid(response)) {
+                        for (int i = 1; i < API.apiCallArray(response).length; i++)
+                            System.out.println(API.apiCallArray(response)[i]);
+                    } else
+                        System.out.println("Aucune partie disponnible");
+                    UI.waiting();
+                case "4":
+                    System.out.println("classement");
+                    break;
+                case "5": 
                     client.close();
                     System.exit(0);
                 default:
                     break;
             }
-            while (startGame) {
+            if (gameId != -1 && !warriorUploaded) {
+                do {
+                    choice = UI.selectWarrior();
+                    response = client.request(API.newWarriorRequest(FileOperation.read(choice), gameId));
+                    System.out.println(response);
+                } while (!API.valid(response));
+                warriorUploaded = true;
+            }
+            while (gameId != -1 && warriorUploaded) {
                 UI.reset();
                 System.out.println("lancement jeu...");
+                try {
+                    Thread.sleep(16);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 

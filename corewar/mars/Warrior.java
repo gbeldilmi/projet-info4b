@@ -7,9 +7,11 @@ public class Warrior {
   private Core[] program;
   private int id, position, rank;
   private boolean alive;
+  private String name;
 
-  public Warrior(int id, String[] program) throws RuntimeException {
+  public Warrior(int id, String name, String[] program) throws RuntimeException {
     this.id = id;
+    this.name = name;
     this.program = Compiler.compile(program);
     position = 0;
     rank = 0;
@@ -21,6 +23,10 @@ public class Warrior {
       this.rank = rank;
       alive = false;
     }
+  }
+
+  public String getName() {
+    return this.name;
   }
 
   public int getRank() {

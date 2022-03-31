@@ -30,7 +30,7 @@ public class Client {
 
     public String request(String request) {
         String response = null;
-
+        
         try {
             this.bufferedWriter.write(request);
             this.bufferedWriter.newLine();

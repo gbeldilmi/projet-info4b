@@ -98,7 +98,7 @@ public class Mars extends Thread {
     } else {
       for (Warrior warrior : warriors) {
         if (warrior.isAlive()) {
-          warrior.die(1);
+          warrior.die(0);
         }
       }
       return true;

@@ -48,19 +48,25 @@ public class Server {
             System.out.println("server (response) -> " + apiCall + "\n");
     }
 
-    public String response(String username, String request) {
+    public String response(ClientHandler clientHandler, String request) {
         String response = "";
 
-        this.echo(username, request, false);
+        this.echo(clientHandler.getClientUsername(), request, false);
         switch (API.callType(request)) {
             case API.USERNAME:
                 response = checkUsername(request); break;
             case API.WARRIOR:
-                response = addWarrior(request, username); break;
+                response = addWarrior(request, clientHandler); break;
+            case API.NEWGAME:
+                response = newGame(request, clientHandler); break;
+            case API.JOINGAME:
+                response = joinGame(request, clientHandler); break;
+            case API.GETGAMES:
+                response = getGames(); break;
             default:
                 response = API.ERROR; break;
         }
-        this.echo(username, response, true);
+        this.echo(clientHandler.getClientUsername(), response, true);
         return response;
     }
 
@@ -75,19 +81,55 @@ public class Server {
 
     // revoir fonction ! ajout warrior possible si joueur dans game
     // ajout warrior dans game
-    private String addWarrior(String request, String username) {
+    private String addWarrior(String request, ClientHandler clientHandler) {
         String[] requestArray = API.apiCallArray(request);
-        String[] program = new String[requestArray.length - 2];
-        
-        if (requestArray.length <= 2)
+        if (requestArray.length <= 3)
             return API.ERROR;
-        this.warriorName.add(requestArray[1]);
-        this.warriorOwner.add(username);
-        for (int i = 2; i < requestArray.length; i++)
-            program[i - 2] = requestArray[i];
-        this.warriors.add(new Warrior(this.warriors.size(), program));
+        String[] program = new String[requestArray.length - 3];
+        String warriorName = requestArray[2];
+        int gameId = Integer.parseInt(requestArray[1]);
+        int clientId = this.games.get(gameId).getClientId(clientHandler.getClientUsername());
+        for (int i = 3; i < requestArray.length; i++)
+            program[i - 3] = requestArray[i];
+        this.games.get(gameId).addWarrior(new Warrior(clientId, warriorName, program));
         return API.OK;
     }
+
+    private String newGame(String request, ClientHandler clientHandler) {
+        int maxPlayers;
+        String[] requestArray = API.apiCallArray(request);
+        if (requestArray.length != 2)
+            return API.ERROR;
+        maxPlayers = Integer.parseInt(requestArray[1]);
+        this.games.add(new Game(clientHandler, maxPlayers));
+        Thread thread = new Thread(this.games.get(this.games.size() - 1));
+        thread.start();
+        return API.OK + API.SEP + (this.games.size() - 1);
+    }
+    
+    private String joinGame(String request, ClientHandler clientHandler) {
+        int gameId = Integer.parseInt(API.apiCallArray(request)[1]);
+
+        if (gameId < 0 || gameId > this.games.size() - 1)
+            return API.ERROR;
+        if (this.games.get(gameId).addClient(clientHandler))
+            return API.OK;
+        return API.ERROR;
+    }
+
+    private String getGames() {
+        String gameList = API.OK;
+
+        if (this.games.size() == 0)
+            return API.ERROR;
+        for (int i = 0; i < this.games.size(); i++) {
+            if (!this.games.get(i).isFull())
+                gameList = gameList + API.SEP + "Partie " + i + " (" + this.games.get(i).gameCapacity() + ")";
+        }
+        return gameList;
+    }
+
+    //private String getClassement();
 
     // getGames
     // newGame
