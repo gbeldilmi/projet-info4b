@@ -10,12 +10,15 @@ public class Server {
     private ServerSocket serverSocket;
     private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
     private ArrayList<Game> games = new ArrayList<>();
+    private ClassementHandler classementHandler = new ClassementHandler("test");
     private ArrayList<Warrior> warriors = new ArrayList<>();
     private ArrayList<String> warriorName = new ArrayList<>();
     private ArrayList<String> warriorOwner = new ArrayList<>();
 
     public Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
+        Thread thread = new Thread(classementHandler);
+        thread.start();
     }
 
     //  Acceptation des nouvelles connexions entrantes et création de clientHandlers
@@ -108,6 +111,7 @@ public class Server {
             if (!added && games.get(i) == null) {
                 games.set(i, new Game(clientHandler, maxPlayers));
                 Thread thread = new Thread(this.games.get(i));
+                this.classementHandler.addGame(thread);
                 thread.start();
                 added = true;
             }
@@ -115,6 +119,7 @@ public class Server {
         if (!added) {
             this.games.add(new Game(clientHandler, maxPlayers));
             Thread thread = new Thread(this.games.get(this.games.size() - 1));
+            this.classementHandler.addGame(thread);
             thread.start();
         }
         return API.OK + API.SEP + (this.games.size() - 1);
