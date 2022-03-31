@@ -11,7 +11,9 @@ public class API {
     public static final String NEWGAME = "newgame";
     public static final String JOINGAME = "joingame";
     public static final String GETGAMES = "getgames";
+    public static final String WAITMSG = "waitmsg";
     public static final String MSG = "msg";
+    public static final String DESTROYGAME = "destroygame";
 
     public static String[] apiCallArray(String apiCall) {
         return apiCall.split(API.SEP);
@@ -47,5 +49,13 @@ public class API {
 
     public static String getGamesRequest() {
         return API.GETGAMES;
+    }
+
+    public static String waitMsgRequest() {
+        return API.WAITMSG;
+    }
+
+    public static String destroyGameRequest(int gameId) {
+        return API.DESTROYGAME + API.SEP + gameId;
     }
 }

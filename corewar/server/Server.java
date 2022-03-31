@@ -63,6 +63,8 @@ public class Server {
                 response = joinGame(request, clientHandler); break;
             case API.GETGAMES:
                 response = getGames(); break;
+            case API.DESTROYGAME:
+                response = destroyGame(request); break;
             default:
                 response = API.ERROR; break;
         }
@@ -97,13 +99,24 @@ public class Server {
 
     private String newGame(String request, ClientHandler clientHandler) {
         int maxPlayers;
+        boolean added = false;
         String[] requestArray = API.apiCallArray(request);
         if (requestArray.length != 2)
             return API.ERROR;
         maxPlayers = Integer.parseInt(requestArray[1]);
-        this.games.add(new Game(clientHandler, maxPlayers));
-        Thread thread = new Thread(this.games.get(this.games.size() - 1));
-        thread.start();
+        for (int i = 0; i < this.games.size(); i++) {
+            if (!added && games.get(i) == null) {
+                games.set(i, new Game(clientHandler, maxPlayers));
+                Thread thread = new Thread(this.games.get(i));
+                thread.start();
+                added = true;
+            }
+        }
+        if (!added) {
+            this.games.add(new Game(clientHandler, maxPlayers));
+            Thread thread = new Thread(this.games.get(this.games.size() - 1));
+            thread.start();
+        }
         return API.OK + API.SEP + (this.games.size() - 1);
     }
     
@@ -112,21 +125,35 @@ public class Server {
 
         if (gameId < 0 || gameId > this.games.size() - 1)
             return API.ERROR;
-        if (this.games.get(gameId).addClient(clientHandler))
+        if (this.games.get(gameId) != null && this.games.get(gameId).addClient(clientHandler))
             return API.OK;
         return API.ERROR;
     }
 
     private String getGames() {
-        String gameList = API.OK;
+        String gameList = "";
 
+        System.out.println("ici");
         if (this.games.size() == 0)
             return API.ERROR;
+        System.out.println("ici2");
         for (int i = 0; i < this.games.size(); i++) {
-            if (!this.games.get(i).isFull())
+            //System.out.println(gameList + API.SEP + "Partie " + i + " (" + this.games.get(i).gameCapacity() + ")");
+            if (this.games.get(i) != null && !this.games.get(i).isFull())
                 gameList = gameList + API.SEP + "Partie " + i + " (" + this.games.get(i).gameCapacity() + ")";
         }
-        return gameList;
+        if (gameList.length() != 0)
+            return API.OK + gameList;
+        return API.ERROR;
+    }
+
+    private String destroyGame(String request) {
+        int gameId = Integer.parseInt(API.apiCallArray(request)[1]);
+
+        if (gameId < 0 || gameId > this.games.size() - 1)
+            return API.ERROR;
+        this.games.set(gameId, null);
+        return API.OK;
     }
 
     //private String getClassement();

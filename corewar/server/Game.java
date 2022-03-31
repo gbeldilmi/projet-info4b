@@ -3,6 +3,7 @@ package corewar.server;
 import java.util.ArrayList;
 
 import corewar.mars.Warrior;
+import corewar.utils.API;
 import corewar.mars.Mars;
 
 public class Game implements Runnable { 
@@ -43,6 +44,10 @@ public class Game implements Runnable {
                 for (Warrior warrior : warriors) {
                     System.out.println(this.clientHandlers.get(warrior.getId()).getClientUsername() + " (" + warrior.getName() + ") : " + warrior.getRank());
                 }
+                for (ClientHandler clientHandler : this.clientHandlers) {
+                    sendGameResult(clientHandler);
+                    System.out.println("coucou je suis là et j'en ai plein le cul");
+                }
                 this.started = false;
                 this.warriors = null;
                 this. clientHandlers = null;
@@ -78,6 +83,24 @@ public class Game implements Runnable {
             }
         }
         */
+    }
+
+    private void sendGameResult(ClientHandler clientHandler) {
+        Warrior swap;
+        String str = API.MSG;
+
+        for (int i = 0; i < warriors.length; i++) {
+            for (int j = i; j < warriors.length; j++) {
+                if (warriors[i].getRank() > warriors[j].getRank()) {
+                    swap = warriors[i];
+                    warriors[i] = warriors[j];
+                    warriors[j] = swap;
+                }  
+            }
+        }
+        for (Warrior warrior : warriors)
+            str += API.SEP + warrior.getRank() + " : "  + this.clientHandlers.get(warrior.getId()).getClientUsername() + " (" + warrior.getName() + ")";
+        clientHandler.send(str);
     }
 
     private Warrior[] initWarriors() {

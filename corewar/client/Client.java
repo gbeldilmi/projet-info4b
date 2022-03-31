@@ -30,12 +30,20 @@ public class Client {
 
     public String request(String request) {
         String response = null;
-        
+        System.out.println(request);
         try {
-            this.bufferedWriter.write(request);
-            this.bufferedWriter.newLine();
-            this.bufferedWriter.flush();
+            if (!API.callType(request).equals(API.WAITMSG)) {
+                this.bufferedWriter.write(request);
+                this.bufferedWriter.newLine();
+                this.bufferedWriter.flush();
+            }
             response = this.bufferedReader.readLine();
+            /*
+            System.out.println(response);
+            if (API.callType(response).equals(API.MSG)) {
+                return response;
+            }
+            */
         } catch (IOException e) {
             this.close();
         }
