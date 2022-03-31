@@ -6,23 +6,14 @@ import corewar.mars.Warrior;
 public class Test4 {
   public static void main(String[] args) {
     Warrior[] warriors = new Warrior[] {
-      new Warrior(1, new String[] {
-        "MOV 0 1"
+      new Warrior(3, "dwarf1", new String[] {
+        "JMP 2",
+        "DAT -1",
+        "ADD #5 -1",
+        "MOV #0 @-2",
+        "JMP -2"
       }),//*/
-      new Warrior(2, new String[] {
-        "JMP 3",
-        "DAT 0",
-        "DAT 99",
-        "MOV @-2 @-1",
-        "CMP -3 #9",
-        "JMP 4",
-        "ADD #1 -5",
-        "ADD #1 -5",
-        "JMP -5",
-        "MOV #99 93",
-        "JMP 93"
-      }),//*/
-      new Warrior(3, new String[] {
+      new Warrior(4, "dwarf2", new String[] {
         "JMP 2",
         "DAT -1",
         "ADD #5 -1",

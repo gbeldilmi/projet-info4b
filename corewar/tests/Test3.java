@@ -6,19 +6,19 @@ import corewar.mars.Warrior;
 public class Test3 {
   public static void main(String[] args) {
     Warrior[] warriors = new Warrior[] {
-      new Warrior(1, new String[] {
+      new Warrior(1, "aa", new String[] {
         "MOV 0 1"
       }),
-      new Warrior(2, new String[] {
+      new Warrior(2, "aa", new String[] {
         "ADD 0 1"
       }),
-      new Warrior(3, new String[] {
+      new Warrior(3, "aa", new String[] {
         "SUB #77 1"
       }),
-      new Warrior(4, new String[] {
+      new Warrior(4, "aa", new String[] {
         "MOV #1 -1"
       }),
-      new Warrior(5, new String[] {
+      new Warrior(5, "aa", new String[] {
         "ADD @8 1"
       }),
     };
