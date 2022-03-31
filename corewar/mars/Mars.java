@@ -41,15 +41,15 @@ public class Mars extends Thread {
       }
       switch (core.getOpCode()) {
         case MOV:          
-          targetCore2.setValue(targetCore1.getValue());
+          targetCore2.setValue(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
         case ADD:
-          targetCore2.add(targetCore1);
+          targetCore2.add(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
         case SUB:
-          targetCore2.sub(targetCore1);
+          targetCore2.sub(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
         case JMP:

@@ -32,11 +32,15 @@ public class Core {
   }
 
   public void add(Core core) {
-    setValue(value + core.getValue());
+    add(core.getValue());
+  }
+
+  public void add(int value) {
+    setValue(this.value + value);
   }
 
   public boolean decrement() {
-    setValue(value - 1);
+    sub(1);
     return getValue() == 0;
   }
 
@@ -73,7 +77,11 @@ public class Core {
   }
 
   public void sub(Core core) {
-    setValue(value - core.getValue());
+    sub(core.getValue());
+  }
+
+  public void sub(int value) {
+    setValue(this.value - value);
   }
 
   public String toString() {
