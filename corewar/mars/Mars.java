@@ -6,8 +6,8 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
-  private final boolean DEBUG = true;
-  private final long MAX_CYCLE = 10;
+  private final boolean DEBUG = false;
+  private final long MAX_CYCLE = 1000;
   private final int MIN_WARRIOR_SIZE = 32;
   private Warrior[] warriors;
   private Core[] memory;
