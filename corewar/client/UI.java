@@ -9,10 +9,12 @@ import corewar.utils.Read;
 public class UI {
     public static void reset() {
         try {
-            if (System.getProperty("os.name").contains("Windows"))
+            if (System.getProperty("os.name").contains("Windows")) {
                 new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-            else
-                Runtime.getRuntime().exec("clear");
+            } else {
+                System.out.print("\033[H\033[2J");
+                System.out.flush();
+            }
         } catch (IOException | InterruptedException e) {}
     }
 
