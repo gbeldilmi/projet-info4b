@@ -36,7 +36,7 @@ public class FileOperation {
 		int i;
 		int j;
 
-		try (FileOutputStream out = new FileOutputStream(path, true)) {
+		try (FileOutputStream out = new FileOutputStream(path, false)) {
 			for (i = 0; i < content.size(); i++) {
 				for (j = 0; j < content.get(i).length(); j++)
 					out.write(content.get(i).charAt(j));

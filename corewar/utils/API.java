@@ -14,6 +14,7 @@ public class API {
     public static final String WAITMSG = "7";
     public static final String DELETEGAME = "8";
     public static final String ENDCONNECTION = "9";
+    public static final String CLASSEMENT = "10";
 
     public static String[] apiCallToArray(String apiCall) {
         return apiCall.split(API.SEPARATOR);
@@ -63,4 +64,8 @@ public class API {
     public static String endConnectionRequest() {
         return API.ENDCONNECTION;
     }
+
+    public static String getClassementRequest() {
+        return API.CLASSEMENT;
+    }    
 }

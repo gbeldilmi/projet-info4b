@@ -17,7 +17,7 @@ public class Server {
         this.clientHandlers = new ArrayList<>();
         this.socket = socket;
         this.games = new ArrayList<>();
-        this.classementHandler = new ClassementHandler("data/classement.txt");
+        this.classementHandler = new ClassementHandler("classement.txt");
         Thread thread = new Thread(this.classementHandler);
         thread.start();
     }
@@ -78,6 +78,8 @@ public class Server {
                 response = joinGame(clientHandler, request); break;
             case API.UPLOADWARRIOR:
                 response = uploadWarrior(clientHandler, request); break;
+            case API.CLASSEMENT:
+                response = getClassement(); break;
             default:
                 response = API.ERR; break;
         }
@@ -167,5 +169,13 @@ public class Server {
             program[i - 2] = requestArray[i];
         this.games.get(clientHandler.gameId).addWarrior(clientHandler, new Warrior(clientId, name, program));
         return API.VALID;
+    }
+
+    public String getClassement() {
+        String str = this.classementHandler.getClassement();
+        
+        if (str == null)
+            return API.ERR;
+        return API.VALID + API.SEPARATOR + str;
     }
 }

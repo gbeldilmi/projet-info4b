@@ -58,7 +58,15 @@ public class Main {
                         UI.waiting();
                         break;
                     case "3": //    classement
-                        System.out.println("Classment");
+                        UI.reset();
+                        response = client.request(API.getClassementRequest());
+                        if (API.isValidResponse(response)) {
+                            String[] classement = API.apiCallToArray(response);
+                            for (int i = 1; i < classement.length; i += 2)
+                                System.out.println((i / 2 + 1) + " - " + classement[i] + " | score : " + classement[i + 1]);
+                        } else
+                            System.out.println("Classement indisponible !");
+                        UI.waiting();
                         break;
                     case "4": //    quitter
                         client.request(API.endConnectionRequest());
