@@ -3,30 +3,31 @@ package corewar.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.util.ArrayList;
-import corewar.utils.API;
+
 import corewar.mars.Warrior;
+import corewar.utils.API;
 
 public class Server {
-    private ServerSocket serverSocket;
-    private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
-    private ArrayList<Game> games = new ArrayList<>();
-    private ClassementHandler classementHandler = new ClassementHandler("data/classement.txt");
-    //private ArrayList<Warrior> warriors = new ArrayList<>();
-    //private ArrayList<String> warriorName = new ArrayList<>();
-    //private ArrayList<String> warriorOwner = new ArrayList<>();
+    private ServerSocket socket = null;
+    private ArrayList<ClientHandler> clientHandlers = null;
+    private ArrayList<Game> games = null;
+    private ClassementHandler classementHandler = null;
 
-    public Server(ServerSocket serverSocket) {
-        this.serverSocket = serverSocket;
-        Thread thread = new Thread(classementHandler);
+    public Server(ServerSocket socket) {
+        this.clientHandlers = new ArrayList<>();
+        this.socket = socket;
+        this.games = new ArrayList<>();
+        this.classementHandler = new ClassementHandler("data/classement.txt");
+        Thread thread = new Thread(this.classementHandler);
         thread.start();
     }
 
-    //  Acceptation des nouvelles connexions entrantes et création de clientHandlers
     public void start() {
+        ClientHandler clientHandler;
         try {
-            while (!this.serverSocket.isClosed()) {
-                ClientHandler clientHandler = new ClientHandler(serverSocket.accept(), this);
-                System.out.println("Nouvelle connexion !\n");
+            while (!this.socket.isClosed()) {
+                clientHandler = new ClientHandler(socket.accept(), this);
+                System.out.println("Nouvelle connexion sur le port : " + socket.getLocalPort());
                 clientHandlers.add(clientHandler);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
@@ -36,134 +37,135 @@ public class Server {
         }
     }
 
-    // utile ? 
+    //  Si client en jeu ????
     public void removeClientHandler(ClientHandler clientHandler) {
+        if (clientHandler.gameId != -1)
+            this.games.get(clientHandler.gameId).removeClient(clientHandler);
         this.clientHandlers.remove(clientHandler);
     }
 
-    private void echo(String username, String apiCall, boolean response) {
-        if (!response) {
-            if (username != null)
-                System.out.println(username + " (request) -> " + apiCall);
-            else
-                System.out.println("unknown client (request) -> " + apiCall);
+    public void removeGame(int gameId) {
+        for (ClientHandler clientHandler : this.clientHandlers) {
+            if (clientHandler.gameId == gameId) {
+                clientHandler.gameId = -1;
+                clientHandler.warriorId = -1;
+            }
         }
-        else
-            System.out.println("server (response) -> " + apiCall + "\n");
+        this.games.set(gameId, null);
     }
 
-    public String response(ClientHandler clientHandler, String request) {
-        String response = "";
+    private void echoRequest(String username, String request) {
+        System.out.println((username == null ? "unknown" : username) + "(request) -> " + request);
+    }
 
-        this.echo(clientHandler.getClientUsername(), request, false);
-        switch (API.callType(request)) {
-            case API.USERNAME:
-                response = checkUsername(request); break;
-            case API.WARRIOR:
-                response = addWarrior(request, clientHandler); break;
-            case API.NEWGAME:
-                response = newGame(request, clientHandler); break;
+    private void echoResponse(String response) {
+        System.out.println("server (response) -> " + response);
+    }
+
+    
+    public String response(ClientHandler clientHandler, String request) {
+        String response = API.ERR;
+
+        this.echoRequest(clientHandler.clientUsername, request);
+        switch (API.getCallType(request)) {
+            case API.SETUSERNAME:
+                response = setUsername(clientHandler, request); break;
+            case API.CREATEGAME:
+                response = createGame(clientHandler, request); break;
+            case API.GETGAMELIST:
+                response = getGamesList(); break;
             case API.JOINGAME:
-                response = joinGame(request, clientHandler); break;
-            case API.GETGAMES:
-                response = getGames(); break;
-            case API.DESTROYGAME:
-                response = destroyGame(request); break;
+                response = joinGame(clientHandler, request); break;
+            case API.UPLOADWARRIOR:
+                response = uploadWarrior(clientHandler, request); break;
             default:
-                response = API.ERROR; break;
+                response = API.ERR; break;
         }
-        this.echo(clientHandler.getClientUsername(), response, true);
+        this.echoResponse(response);
         return response;
     }
 
-    private String checkUsername(String request) {
-        String username = API.apiCallArray(request)[1];
-        for (ClientHandler clientHandler : this.clientHandlers) {
-            if (clientHandler.getClientUsername() != null && clientHandler.getClientUsername().equals(username))
-                return API.ERROR;
+    private String setUsername(ClientHandler clientHandler, String request) {
+        String username = API.apiCallToArray(request)[1];
+
+        if (clientHandler.clientUsername != null)
+            return API.ERR;
+        for (ClientHandler otherClientHandler : this.clientHandlers) {
+            if (username.equals(otherClientHandler.clientUsername))
+                return API.ERR;
         }
-        return API.OK;
+        clientHandler.clientUsername = username;
+        return API.VALID;
     }
 
-    private String addWarrior(String request, ClientHandler clientHandler) {
-        String[] requestArray = API.apiCallArray(request);
-        if (requestArray.length <= 3)
-            return API.ERROR;
-        String[] program = new String[requestArray.length - 3];
-        String warriorName = requestArray[2];
-        int gameId = Integer.parseInt(requestArray[1]);
-        int clientId = this.games.get(gameId).getClientId(clientHandler.getClientUsername());
-        for (int i = 3; i < requestArray.length; i++)
-            program[i - 3] = requestArray[i];
-        this.games.get(gameId).addWarrior(new Warrior(clientId, warriorName, program));
-        return API.OK;
-    }
+    public String createGame(ClientHandler clientHandler, String request) {
+        int gameLength;
+        int i;
+        String[] requestArray = API.apiCallToArray(request);
+        int maxPlayers = Integer.parseInt(requestArray[1]);
 
-    private String newGame(String request, ClientHandler clientHandler) {
-        int maxPlayers;
-        boolean added = false;
-        String[] requestArray = API.apiCallArray(request);
-        if (requestArray.length != 2)
-            return API.ERROR;
-        maxPlayers = Integer.parseInt(requestArray[1]);
-        for (int i = 0; i < this.games.size(); i++) {
-            if (!added && games.get(i) == null) {
-                games.set(i, new Game(clientHandler, maxPlayers));
-                Thread thread = new Thread(this.games.get(i));
-                this.classementHandler.addGame(this.games.get(i), thread);
-                thread.start();
-                added = true;
+        gameLength = this.games.size();
+        i = 0;
+        while (i < gameLength) {
+            if (this.games.get(i) == null) {
+                this.addGame(i, new Game(this, clientHandler, maxPlayers));
+                clientHandler.gameId = i;
+                return API.VALID + API.SEPARATOR + i;
             }
+            i++;
         }
-        if (!added) {
-            this.games.add(new Game(clientHandler, maxPlayers));
-            Thread thread = new Thread(this.games.get(this.games.size() - 1));
-            this.classementHandler.addGame(this.games.get(this.games.size() - 1), thread);
-            thread.start();
-        }
-        return API.OK + API.SEP + (this.games.size() - 1);
-    }
-    
-    private String joinGame(String request, ClientHandler clientHandler) {
-        int gameId = Integer.parseInt(API.apiCallArray(request)[1]);
-
-        if (gameId < 0 || gameId > this.games.size() - 1)
-            return API.ERROR;
-        if (this.games.get(gameId) != null && this.games.get(gameId).addClient(clientHandler))
-            return API.OK;
-        return API.ERROR;
+        this.addGame(-1, new Game(this, clientHandler, maxPlayers));
+        clientHandler.gameId = gameLength;
+        return API.VALID + API.SEPARATOR + (gameLength);
     }
 
-    private String getGames() {
+    private void addGame(int i, Game game) {
+        if (i == -1)
+            this.games.add(game);
+        else
+            this.games.set(i, game);
+        Thread thread = new Thread(game);
+        this.classementHandler.addGame(game, thread);
+        thread.start();
+    }
+
+    public String getGamesList() {
         String gameList = "";
+        int length = this.games.size();
 
-        System.out.println("ici");
-        if (this.games.size() == 0)
-            return API.ERROR;
-        System.out.println("ici2");
-        for (int i = 0; i < this.games.size(); i++) {
-            //System.out.println(gameList + API.SEP + "Partie " + i + " (" + this.games.get(i).gameCapacity() + ")");
+        if (length == 0)
+            return API.ERR;
+        for (int i = 0; i < length; i++) {
             if (this.games.get(i) != null && !this.games.get(i).isFull())
-                gameList = gameList + API.SEP + "Partie " + i + " (" + this.games.get(i).gameCapacity() + ")";
+                gameList = gameList + API.SEPARATOR + i + API.SEPARATOR + this.games.get(i);
         }
-        if (gameList.length() != 0)
-            return API.OK + gameList;
-        return API.ERROR;
+        if (gameList.length() == 0)
+            return API.ERR;
+        return API.VALID + gameList;
     }
 
-    private String destroyGame(String request) {
-        int gameId = Integer.parseInt(API.apiCallArray(request)[1]);
+    public String joinGame(ClientHandler clientHandler, String request) {
+        int gameId = Integer.parseInt(API.apiCallToArray(request)[1]);
 
-        if (gameId < 0 || gameId > this.games.size() - 1)
-            return API.ERROR;
-        this.games.set(gameId, null);
-        return API.OK;
+        if (this.games.get(gameId) == null || this.games.get(gameId).isFull())
+            return API.ERR;
+        this.games.get(gameId).addClient(clientHandler);
+        clientHandler.gameId = gameId;
+        return API.VALID;
     }
 
-    //private String getClassement();
-
-    // getGames
-    // newGame
-    // addClientToGame
-    
+    public String uploadWarrior(ClientHandler clientHandler, String request) {
+        String[] requestArray = API.apiCallToArray(request);
+        int length = requestArray.length;
+        
+        if (length < 3)
+            return API.ERR;
+        String[] program = new String[length - 2];
+        String name = requestArray[1];
+        int clientId = this.games.get(clientHandler.gameId).getClientId(clientHandler.clientUsername);
+        for (int i = 2; i < length; i++)
+            program[i - 2] = requestArray[i];
+        this.games.get(clientHandler.gameId).addWarrior(clientHandler, new Warrior(clientId, name, program));
+        return API.VALID;
+    }
 }

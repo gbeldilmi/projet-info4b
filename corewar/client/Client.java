@@ -1,64 +1,57 @@
 package corewar.client;
 
-import java.io.IOException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
 import corewar.utils.API;
 
 public class Client {
-    private Socket socket;
-    private BufferedReader bufferedReader;
-    private BufferedWriter bufferedWriter;
-    private String username = null;
+    private Socket socket = null;
+    private BufferedReader in = null;
+    private BufferedWriter out = null;
+    public String username = null;
+    public int gameId = -1;
 
     public Client(Socket socket) {
         try {
             this.socket = socket;
-            this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            this.in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            this.out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (IOException e) {
             this.close();
         }
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String request(String request) {
-        String response = null;
-        System.out.println(request);
+        String response = "";
+
         try {
-            if (!API.callType(request).equals(API.WAITMSG)) {
-                this.bufferedWriter.write(request);
-                this.bufferedWriter.newLine();
-                this.bufferedWriter.flush();
+            if (!API.getCallType(request).equals(API.WAITMSG)) {
+                this.out.write(request);
+                this.out.newLine();
+                this.out.flush();
             }
-            response = this.bufferedReader.readLine();
-            /*
-            System.out.println(response);
-            if (API.callType(response).equals(API.MSG)) {
-                return response;
-            }
-            */
+            response = this.in.readLine();
         } catch (IOException e) {
             this.close();
         }
         return response;
     }
 
+    //  send request leave ????
     public void close() {
         try {
-            if (this.bufferedReader != null)
-                bufferedReader.close();
-            if (this.bufferedWriter != null)
-                bufferedWriter.close();
+            if (this.in != null)
+                this.in.close();
+            if (this.out != null)
+                this.out.close();
             if (this.socket != null)
                 this.socket.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

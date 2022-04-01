@@ -2,131 +2,81 @@ package corewar.server;
 
 import java.util.ArrayList;
 
+import corewar.mars.Mars;
 import corewar.mars.Warrior;
 import corewar.utils.API;
-import corewar.mars.Mars;
 
-public class Game implements Runnable { 
-    private Mars mars;
-    private ArrayList<ClientHandler> clientHandlers = new ArrayList<>(); // index 0 == host
-    private Warrior[] warriors;
-    private int maxPlayers;
-    private boolean started;
-
-    public Game(ClientHandler host, int maxPlayers) {
-        clientHandlers.add(host);
+public class Game implements Runnable {
+    private Server server = null;
+    private Mars mars = null;
+    private ArrayList<ClientHandler> clientHandlers = null;
+    private Warrior[] warriors = null;
+    private int maxPlayers = -1;
+    
+    public Game(Server server, ClientHandler clientHandler, int maxPlayers) {
+        this.server = server;
+        this.clientHandlers = new ArrayList<>();
+        this.clientHandlers.add(clientHandler);
         this.maxPlayers = maxPlayers;
         this.warriors = initWarriors();
-        this.started = false;
     }
 
     public void run() {
-        System.out.println("Running");
         while (!isFull() || !isAllWarriorUploaded()) {
-            System.out.println("Wait game ready");
             try {
-                Thread.sleep(500);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
-        if (!this.started && isFull() && isAllWarriorUploaded()) {
-            System.out.println("Init");
-            this.mars = new Mars(this.warriors);
-            this.mars.start();
-            this.started = true;
-        }
-        if (this.started) {
-            System.out.println("Wait end");
-            try {
-                this.mars.join();
-                System.out.println(this.mars);
-                for (Warrior warrior : warriors) {
-                    System.out.println(this.clientHandlers.get(warrior.getId()).getClientUsername() + " (" + warrior.getName() + ") : " + warrior.getRank());
-                }
-                for (ClientHandler clientHandler : this.clientHandlers)
-                    sendGameResult(clientHandler);
-                this.started = false;
-                //this.warriors = null; // bloque la récupération des classements
-                this. clientHandlers = null;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        /*
-        System.out.println(isFull() + " " + this.warriors.length + " " + this.maxPlayers);
+        this.mars = new Mars(this.warriors);
+        this.mars.start();
         try {
-            Thread.sleep(1000);
+            this.mars.join();
+            this.setClassement();
+            this.sendClassement();
+            this.server.removeGame(this.clientHandlers.get(0).gameId);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        if (!isFull() && this.warriors.length != this.maxPlayers) {
-            try {
-                System.out.println(this.gameCapacity() + " " + this.warriors.length);
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        } else if (!this.started && isFull() && this.warriors.length == this.maxPlayers) {
-            this.mars = new Mars(this.warriors);
-            this.mars.start();
-            System.out.println("Game started...");
-            this.started = true;
-        } else if (started) {
-            try {
-                this.mars.join();
-                System.out.println("fin de la partie !");
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-        */
     }
 
-    public boolean isRunnning() {
-        return this.started;
+    public String[] getClassement() {
+        int length = this.warriors.length;
+        String[] warriorNames = new String[length];
+
+        for (int i = 0; i < length; i++)
+            warriorNames[i] = this.warriors[i].getName();
+        return warriorNames;
     }
 
-    public ArrayList<String> getGameClassement() {
-        String tmpName;
-        Warrior tmpWarrior;
-        ArrayList<String> classement = new ArrayList<>();
-
-        for (int i = 0; i < warriors.length; i++)
-            classement.add(warriors[i].getName());
-
-        for (int i = 0; i < warriors.length; i++) {
-            for (int j = i; j < warriors.length; j++) {
-                if (warriors[i].getRank() > warriors[j].getRank()) {
-                    tmpWarrior = warriors[i];
-                    tmpName = classement.get(i);
-                    warriors[i] = warriors[j];
-                    classement.set(i, classement.get(j));
-                    warriors[j] = tmpWarrior;
-                    classement.set(j, tmpName);
-                }  
-            }
-        }
-        return classement;
-
-    }
-
-    private void sendGameResult(ClientHandler clientHandler) {
+    private void setClassement() {
+        int length = this.warriors.length;
         Warrior swap;
-        String str = API.MSG;
 
-        for (int i = 0; i < warriors.length; i++) {
-            for (int j = i; j < warriors.length; j++) {
-                if (warriors[i].getRank() > warriors[j].getRank()) {
-                    swap = warriors[i];
-                    warriors[i] = warriors[j];
-                    warriors[j] = swap;
+        for (int i = 0; i < length; i++) {
+            for (int j = i; j < length; j++) {
+                if (this.warriors[i].getRank() > this.warriors[j].getRank()) {
+                    swap = this.warriors[i];
+                    this.warriors[i] = this.warriors[j];
+                    this.warriors[j] = swap;
                 }  
             }
         }
-        for (Warrior warrior : warriors)
-            str += API.SEP + warrior.getRank() + " : "  + this.clientHandlers.get(warrior.getId()).getClientUsername() + " (" + warrior.getName() + ")";
-        clientHandler.send(str);
+    }
+
+    public void sendClassement() {
+        String str = "";
+        int i = 1;
+
+        for (Warrior warrior : this.warriors) {
+            str += i + " - " + this.clientHandlers.get(warrior.getId()).clientUsername + " (" + warrior.getName() + ")" + API.SEPARATOR;
+            i++;
+        }
+        str = str.substring(0, str.length() - 1);
+        for (ClientHandler clientHandler : this.clientHandlers) {
+            clientHandler.send(str);
+        }
     }
 
     private Warrior[] initWarriors() {
@@ -134,11 +84,7 @@ public class Game implements Runnable {
 
         for (int i = 0; i < warriors.length; i++)
             warriors[i] = null;
-        return  warriors;
-    }
-
-    public String gameCapacity() {
-        return this.clientHandlers.size() + "/" + this.maxPlayers;
+        return warriors;
     }
 
     public boolean isFull() {
@@ -146,39 +92,54 @@ public class Game implements Runnable {
     }
 
     public boolean isAllWarriorUploaded() {
-        boolean uploaded = true;
-
         for (int i = 0; i < this.warriors.length; i++) {
             if (this.warriors[i] == null)
-                uploaded = false;
+                return false;
         }
-        if (uploaded)
-            return this.warriors.length == this.clientHandlers.size();
-        return uploaded;
+        return true;
     }
 
     public int getClientId(String username) {
-        for (int i = 0; i < clientHandlers.size(); i++) {
-            if (clientHandlers.get(i).getClientUsername().equals(username))
+        int length = this.clientHandlers.size();
+
+        for (int i = 0; i < length; i++) {
+            if (this.clientHandlers.get(i).clientUsername.equals(username))
                 return i;
         }
         return -1;
     }
-
-    //  Voir si juste
-    public synchronized void addWarrior(Warrior warrior) {
+    
+    public synchronized void addWarrior(ClientHandler clientHandler, Warrior warrior) {
         int i = 0;
 
         while (i < this.warriors.length && this.warriors[i] != null)
             i++;
         if (this.warriors[i] == null)
             this.warriors[i] = warrior;
+        clientHandler.warriorId = i;
     }
 
-    public synchronized boolean addClient(ClientHandler clientHandler) {
-        if (this.clientHandlers.size() == this.maxPlayers)
-            return false;
+    public synchronized void addClient(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
-        return true;
+    }
+
+    public synchronized void removeClient(ClientHandler clientHandler) {
+        if (clientHandler.warriorId == -1) {
+            clientHandler.gameId = -1;
+            this.clientHandlers.remove(clientHandler);
+        }
+        else {
+            if (!this.isAllWarriorUploaded()) {
+                this.warriors[clientHandler.warriorId] = null;
+                clientHandler.gameId = -1;
+                clientHandler.warriorId = -1;
+                this.clientHandlers.remove(clientHandler);
+            }
+        }
+    }
+
+    @Override
+    public String toString() {
+        return this.clientHandlers.size() + "/" + this.maxPlayers;
     }
 }

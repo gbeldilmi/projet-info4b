@@ -1,18 +1,12 @@
 package corewar.client;
 
-import corewar.utils.Read;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.io.File;
 
-public class UI {
-    public static void printLogo() {
-        System.out.println("#####  #####  #####  #####  #   #  #####  #####");
-        System.out.println("#      #   #  #   #  #      #   #  #   #  #   #");
-        System.out.println("#      #   #  #####  ####   # # #  #####  #####");
-        System.out.println("#      #   #  #  #   #      # # #  #   #  #  #");
-        System.out.println("#####  #####  #   #  #####  #####  #   #  #   #\n\n");
-    }
+import corewar.utils.Read;
 
+public class UI {
     public static void reset() {
         try {
             if (System.getProperty("os.name").contains("Windows"))
@@ -20,23 +14,21 @@ public class UI {
             else
                 Runtime.getRuntime().exec("clear");
         } catch (IOException | InterruptedException e) {}
-        UI.printLogo();
     }
 
     public static String serverConnexion() {
         String choice;
 
         reset();
-        System.out.println("1 : mode hors ligne");
-        System.out.println("2 : mode en ligne");
-        System.out.println("3 : quitter");
+        System.out.println("1 : connexion\n2 : quitter");
         do {
             System.out.print(">> ");
             choice = Read.S();
-        } while (!choice.equals("1") && !choice.equals("2") && !choice.equals("3"));
-        if (choice.equals("3"))
+        } while (!choice.equals("1") && !choice.equals("2"));
+        if (choice.equals("2"))
             System.exit(0);
-        if (choice.equals("2")) {
+        else {
+            reset();
             System.out.print("Addresse ip du serveur >> ");
             return Read.S();
         }
@@ -51,29 +43,44 @@ public class UI {
         return Read.S();
     }
 
-    public static String gameLoopMenu() {
-        String choice;
+    public static String gameMenu() {
+        String input;
 
         reset();
-        System.out.println("1 : creer une nouvelle partie");
-        System.out.println("2 : rejoindre une partie");
-        System.out.println("3 : afficher les parties");
-        System.out.println("4 : afficher le classement");
-        System.out.println("5 : quitter");
-        /*
-        System.out.println("1 : " + (!warriorUploaded ? "uploader un warrior" : "lancer partie"));
-        System.out.println("2 : afficher le classement");
-        System.out.println("3 : quitter");
-        */
+        System.out.println("1 : creer une nouvelle partie\n2 : rejoindre une partie\n3 : afficher le classement\n4 : quitter");
         do {
             System.out.print(">> ");
-            choice = Read.S();
-        } while (!choice.equals("1") && !choice.equals("2") && !choice.equals("3") && !choice.equals("4") && !choice.equals("5"));
-        return choice;
+            input = Read.S();
+        } while (Integer.parseInt(input) < 1 || Integer.parseInt(input) > 4);
+        return input;
+    }
+
+    public static int numberOfPlayers() {
+        int input;
+
+        reset();
+        System.out.println("Nombre de joueurs (2 joueurs minimum) ");
+        do {
+            System.out.print(">> ");
+            input = Read.i();
+        } while (input < 2);
+        return input;
+    }
+
+    public static int gameId(ArrayList<Integer> ids) {
+        int input;
+
+        System.out.println("Identifiant de partie ");
+        do {
+            System.out.print(">> ");
+            input = Read.i();
+        } while (!ids.contains(input));
+        reset();
+        return input;
     }
 
     public static void waiting() {
-        System.out.println("[Entree] pour retourner au menu");
+        System.out.println("Appuyez sur [Entree] pour retourner au menu");
         Read.S();
     }
 

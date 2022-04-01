@@ -1,29 +1,20 @@
 package corewar.client;
 
-import corewar.utils.API;
-import corewar.utils.Read;
 import java.io.IOException;
+
+import corewar.utils.API;
+import corewar.utils.FileOperation;
 import java.net.Socket;
 import java.net.UnknownHostException;
-
-import corewar.utils.FileOperation;
+import java.util.ArrayList;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        // #############################################
-        // MAIN TEMPORAIRE TEST CLIENT SERVEUR !!!!!!!!!
-        // #############################################
         Socket socket = new Socket();
-        Client client;
-        String response;
-        String username;
-        boolean warriorUploaded = false;
-        boolean host = false;
-        int gameId = -1;
-        String choice;
-        int value;
+        Client client = null;
+        String response = "";
+        String input = "";
 
-        //  Connexion du client au serveur
         while (!socket.isConnected()) {
             try {
                 socket = new Socket(UI.serverConnexion(), 1234);
@@ -31,89 +22,65 @@ public class Main {
         }
         client = new Client(socket);
 
-        //  Choix du pseudo du client
-        username = UI.usernameChoice("");
-        response = client.request(API.newUsernameRequest(username));
-        while (username.contains(API.SEP) || !API.valid(response))
-            username = UI.usernameChoice("Pseudo déjà prix");
-        client.setUsername(username);
-
+        input = UI.usernameChoice("");
+        while (input.contains(API.SEPARATOR) || !API.isValidResponse(client.request(API.setUsernameRequest(input))))
+            input = UI.usernameChoice("Pseudo invalide ou deja pris");
+        client.username = input; 
         while (true) {
-            if (gameId == -1 && !warriorUploaded) {
-                choice = UI.gameLoopMenu();
-                switch (choice) {
-                    case "1":
-                        System.out.print("Nombre de joueurs >> ");
-                        response = client.request(API.newGameRequest(Read.i()));
-                        gameId = Integer.parseInt(API.apiCallArray(response)[1]);
-                        host = true;
-                        System.out.println("Numero de partie : " + gameId);
+            if (client.gameId == -1) {
+                input = UI.gameMenu();
+                switch (input) {
+                    case "1": //    nouvelle partie
+                        response = client.request(API.createGameRequest(UI.numberOfPlayers()));
+                        client.gameId = Integer.parseInt(API.apiCallToArray(response)[1]);
+                        System.out.println("Identifiant de partie : " + client.gameId);
                         UI.waiting();
                         break;
-                    case "2":
-                        System.out.print("Numero de partie >> ");
-                        gameId = Read.i();
-                        response = client.request(API.joinGameRequest(gameId));
-                        if (API.valid(response))
-                            System.out.println("Vous avez rejoint la partie " + gameId + " !");
-                        else {
-                            System.out.println("Numero de partie invalide ou partie complete !");
-                            gameId = -1;
-                        }
-                        UI.waiting();
-                        break;
-                    case "3":
-                        response = client.request(API.getGamesRequest());
-                        if (API.valid(response)) {
-                            for (int i = 1; i < API.apiCallArray(response).length; i++)
-                                System.out.println(API.apiCallArray(response)[i]);
+                    case "2": //    rejoindre partie
+                        UI.reset();
+                        response = client.request(API.getGameListRequest());
+                        if (API.isValidResponse(response)) {
+                            String[] games = API.apiCallToArray(response);
+                            ArrayList<Integer> ids = new ArrayList<>();
+                            for (int i = 1; i < games.length; i += 2) {
+                                System.out.println("Identifiant de partie : " + games[i] + "\nNombre de joueurs : " + games[i + 1] + "\n");
+                                ids.add(Integer.parseInt(games[i]));
+                            }
+                            int id = UI.gameId(ids);
+                            response = client.request(API.joinGameRequest(id));
+                            if (API.isValidResponse(response)) {
+                                System.out.println("Vous avez rejoint la partie !");
+                                client.gameId = id;
+                            } else
+                                System.out.println("Impossible de rejoindre cette partie !");
                         } else
-                            System.out.println("Aucune partie disponnible");
+                            System.out.println("Aucune partie trouvee !");
                         UI.waiting();
-                    case "4":
-                        System.out.println("classement");
                         break;
-                    case "5": 
+                    case "3": //    classement
+                        System.out.println("Classment");
+                        break;
+                    case "4": //    quitter
+                        client.request(API.endConnectionRequest());
                         client.close();
                         System.exit(0);
+                        break;
                     default:
                         break;
                 }
-            }
-            if (gameId != -1 && !warriorUploaded) {
+            } else {
                 do {
-                    choice = UI.selectWarrior();
-                    response = client.request(API.newWarriorRequest(FileOperation.read(choice), gameId));
-                    System.out.println(response);
-                } while (!API.valid(response));
+                    response = client.request(API.uploadWarriorRequest(FileOperation.read(UI.selectWarrior())));
+                } while (!API.isValidResponse(response));
                 UI.reset();
-                
                 response = client.request(API.waitMsgRequest());
+                String[] classement = API.apiCallToArray(response);
                 System.out.println("Resultat de la partie : \n");
-                for (int i = 1; i < API.apiCallArray(response).length; i++)
-                    System.out.println(API.apiCallArray(response)[i]);
-                    if (host) {
-                    client.request(API.destroyGameRequest(gameId));
-                    host = false;
-                }
-                // kick joueurs game + supprimer game
-
-                warriorUploaded = false;
-                gameId = -1;
+                for (int i = 0; i < classement.length; i++)
+                    System.out.println(classement[i]);
+                client.gameId = -1;
                 UI.waiting();
             }
         }
-
-        /*
-        System.out.println("Warrior : ");
-        String path;
-        do {
-            System.out.print(">> ");
-            path = Read.S();
-        } while(!new File(path).exists());
-        response = client.request(API.newWarriorRequest(FileOperation.read(path)));
-        //client.close();
-        */
-
-    }    
+    }
 }
