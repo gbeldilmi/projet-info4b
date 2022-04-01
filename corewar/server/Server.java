@@ -10,10 +10,10 @@ public class Server {
     private ServerSocket serverSocket;
     private ArrayList<ClientHandler> clientHandlers = new ArrayList<>();
     private ArrayList<Game> games = new ArrayList<>();
-    private ClassementHandler classementHandler = new ClassementHandler("test");
-    private ArrayList<Warrior> warriors = new ArrayList<>();
-    private ArrayList<String> warriorName = new ArrayList<>();
-    private ArrayList<String> warriorOwner = new ArrayList<>();
+    private ClassementHandler classementHandler = new ClassementHandler("data/classement.txt");
+    //private ArrayList<Warrior> warriors = new ArrayList<>();
+    //private ArrayList<String> warriorName = new ArrayList<>();
+    //private ArrayList<String> warriorOwner = new ArrayList<>();
 
     public Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
@@ -26,16 +26,17 @@ public class Server {
         try {
             while (!this.serverSocket.isClosed()) {
                 ClientHandler clientHandler = new ClientHandler(serverSocket.accept(), this);
-                System.out.println("new client connected !\n");
+                System.out.println("Nouvelle connexion !\n");
                 clientHandlers.add(clientHandler);
                 Thread thread = new Thread(clientHandler);
                 thread.start();
             }
         } catch (IOException e) {
-
+            e.printStackTrace();
         }
     }
 
+    // utile ? 
     public void removeClientHandler(ClientHandler clientHandler) {
         this.clientHandlers.remove(clientHandler);
     }
@@ -84,8 +85,6 @@ public class Server {
         return API.OK;
     }
 
-    // revoir fonction ! ajout warrior possible si joueur dans game
-    // ajout warrior dans game
     private String addWarrior(String request, ClientHandler clientHandler) {
         String[] requestArray = API.apiCallArray(request);
         if (requestArray.length <= 3)
@@ -111,7 +110,7 @@ public class Server {
             if (!added && games.get(i) == null) {
                 games.set(i, new Game(clientHandler, maxPlayers));
                 Thread thread = new Thread(this.games.get(i));
-                this.classementHandler.addGame(thread);
+                this.classementHandler.addGame(this.games.get(i), thread);
                 thread.start();
                 added = true;
             }
@@ -119,7 +118,7 @@ public class Server {
         if (!added) {
             this.games.add(new Game(clientHandler, maxPlayers));
             Thread thread = new Thread(this.games.get(this.games.size() - 1));
-            this.classementHandler.addGame(thread);
+            this.classementHandler.addGame(this.games.get(this.games.size() - 1), thread);
             thread.start();
         }
         return API.OK + API.SEP + (this.games.size() - 1);

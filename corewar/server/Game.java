@@ -44,12 +44,10 @@ public class Game implements Runnable {
                 for (Warrior warrior : warriors) {
                     System.out.println(this.clientHandlers.get(warrior.getId()).getClientUsername() + " (" + warrior.getName() + ") : " + warrior.getRank());
                 }
-                for (ClientHandler clientHandler : this.clientHandlers) {
+                for (ClientHandler clientHandler : this.clientHandlers)
                     sendGameResult(clientHandler);
-                    System.out.println("coucou je suis là et j'en ai plein le cul");
-                }
                 this.started = false;
-                this.warriors = null;
+                //this.warriors = null; // bloque la récupération des classements
                 this. clientHandlers = null;
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -83,6 +81,34 @@ public class Game implements Runnable {
             }
         }
         */
+    }
+
+    public boolean isRunnning() {
+        return this.started;
+    }
+
+    public ArrayList<String> getGameClassement() {
+        String tmpName;
+        Warrior tmpWarrior;
+        ArrayList<String> classement = new ArrayList<>();
+
+        for (int i = 0; i < warriors.length; i++)
+            classement.add(warriors[i].getName());
+
+        for (int i = 0; i < warriors.length; i++) {
+            for (int j = i; j < warriors.length; j++) {
+                if (warriors[i].getRank() > warriors[j].getRank()) {
+                    tmpWarrior = warriors[i];
+                    tmpName = classement.get(i);
+                    warriors[i] = warriors[j];
+                    classement.set(i, classement.get(j));
+                    warriors[j] = tmpWarrior;
+                    classement.set(j, tmpName);
+                }  
+            }
+        }
+        return classement;
+
     }
 
     private void sendGameResult(ClientHandler clientHandler) {
@@ -155,6 +181,4 @@ public class Game implements Runnable {
         this.clientHandlers.add(clientHandler);
         return true;
     }
-
-
 }
