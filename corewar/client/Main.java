@@ -17,7 +17,7 @@ public class Main {
 
         while (!socket.isConnected()) {
             try {
-                socket = new Socket(UI.serverConnexion(), 1234);
+                socket = new Socket(UI.serverConnexion(), 32769);
             } catch (UnknownHostException e) {}
         }
         client = new Client(socket);
