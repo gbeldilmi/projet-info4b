@@ -1,6 +1,7 @@
 package corewar.mars;
 
 import corewar.mars.Core;
+import corewar.mars.Warrior;
 import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
