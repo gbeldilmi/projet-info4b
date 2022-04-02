@@ -77,7 +77,8 @@ public class Mars extends Thread {
           }
           break;
         case CMP:
-          if (targetCore1.getValue() == targetCore2.getValue()) {
+          if ((core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue()) == 
+              (core.getAddressModeArg2() == AddressMode.IMMEDIATE ? target2 : targetCore2.getValue())) {
             warrior.setPosition(getIndex(target1));
           } else {
             skipNext = false;
