@@ -1,6 +1,5 @@
 package corewar.mars;
 
-import corewar.mars.Compiler;
 import corewar.mars.Core;
 import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
@@ -163,7 +162,7 @@ public class Mars extends Thread {
       for (j = 0; j < p.length; j++) {
         memory[k + j] = p[j];
       }
-      //warriors[i].programFlush();
+      warriors[i].programFlush();
     }
   }
 
