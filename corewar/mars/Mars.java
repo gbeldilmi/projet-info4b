@@ -1,23 +1,28 @@
 package corewar.mars;
 
-import corewar.mars.Compiler;
 import corewar.mars.Core;
+import corewar.mars.Warrior;
 import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Mars extends Thread {
-  private final boolean DEBUG = false;
   private final long MAX_CYCLE = 1000;
   private final int MIN_WARRIOR_SIZE = 32;
   private Warrior[] warriors;
   private Core[] memory;
   private long cycle;
+  private boolean debug;
   
   public Mars(Warrior[] warriors) throws RuntimeException {
+    this(warriors, false);
+  }
+
+  public Mars(Warrior[] warriors, boolean debug) throws RuntimeException {
     if (warriors.length < 2) {
       throw new RuntimeException("It is not possible to play a game with less than 2 warriors.");
     } else {
       cycle = 0;
+      this.debug = debug;
       this.warriors = warriors;
       initMemory();
     }
@@ -35,7 +40,7 @@ public class Mars extends Thread {
       target2 = getAddress(position, core.getAddressModeArg2(), core.getArg2());
       targetCore1 = getCore(target1);
       targetCore2 = getCore(target2);
-      if (DEBUG) {
+      if (debug) {
         System.out.println(">> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
         System.out.println(this);
       }
@@ -77,7 +82,8 @@ public class Mars extends Thread {
           }
           break;
         case CMP:
-          if (targetCore1.getValue() == targetCore2.getValue()) {
+          if ((core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue()) == 
+              (core.getAddressModeArg2() == AddressMode.IMMEDIATE ? target2 : targetCore2.getValue())) {
             warrior.setPosition(getIndex(target1));
           } else {
             skipNext = false;
@@ -162,7 +168,7 @@ public class Mars extends Thread {
       for (j = 0; j < p.length; j++) {
         memory[k + j] = p[j];
       }
-      //warriors[i].programFlush();
+      warriors[i].programFlush();
     }
   }
 

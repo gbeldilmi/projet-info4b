@@ -52,9 +52,10 @@ public class Warrior {
   public void next(int max) {
     position = (position + 1) % max;
   }
-  /*public void programFlush() {
+  
+  public void programFlush() {
     program = null;
-  }//*/
+  }
 
   public void setPosition(int position) {
     this.position = position;
