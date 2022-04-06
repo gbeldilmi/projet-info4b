@@ -31,10 +31,6 @@ public class Core {
     setValue(value);
   }
 
-  public void add(Core core) {
-    add(core.getValue());
-  }
-
   public void add(int value) {
     setValue(this.value + value);
   }
@@ -74,10 +70,6 @@ public class Core {
 
   public void setValue(int value) {
     this.value = value;
-  }
-
-  public void sub(Core core) {
-    sub(core.getValue());
   }
 
   public void sub(int value) {
