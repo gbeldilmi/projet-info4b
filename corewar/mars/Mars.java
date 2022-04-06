@@ -13,10 +13,16 @@ public class Mars extends Thread {
   private long cycle;
   private boolean debug;
   
+  /*
+   * Constructeur minimal, sans affichage de la méoire à chaque cycle
+   */
   public Mars(Warrior[] warriors) throws RuntimeException {
     this(warriors, false);
   }
 
+  /*
+   * Constructeur complet, spécifiant si on doit afficher la méoire à chaque cycle ou non
+   */
   public Mars(Warrior[] warriors, boolean debug) throws RuntimeException {
     if (warriors.length < 2) {
       throw new RuntimeException("It is not possible to play a game with less than 2 warriors.");
@@ -28,6 +34,10 @@ public class Mars extends Thread {
     }
   }
 
+  /*
+   * Execute l'instructions courante du warrior spécifié
+   * et agis sur la mémoire et le warrior en conséquence 
+   */
   public void execute(Warrior warrior) {
     Core core, targetCore1, targetCore2;
     int position, target1, target2;
@@ -98,6 +108,11 @@ public class Mars extends Thread {
     }
   }
 
+  /*
+   * Vérifie si le jeu est terminé
+   * c'est à dire si tous les warriors sont mort
+   * ou si le nombre de cycle max est atteint
+   */
   private boolean isGameOver() {
     if (countAliveWarriors() > 1 && cycle < MAX_CYCLE) {
       return false;
@@ -111,6 +126,9 @@ public class Mars extends Thread {
     }
   }
 
+  /*
+   * Compte le nombre de warrior toujours en lice
+   */
   private int countAliveWarriors() {
     int count = 0;
     for (Warrior warrior : warriors) {
@@ -121,6 +139,10 @@ public class Mars extends Thread {
     return count;
   }
 
+  /*
+   * Traduit l'adresse spécifiée en index dans la mémoire
+   * ou en quantité si le mode d'adressage est immédiat
+   */
   private int getAddress(int position, AddressMode mode, int arg) {
     if (mode != AddressMode.INDIRECT) {
       return (mode == AddressMode.IMMEDIATE) ? arg : position + arg;
@@ -128,10 +150,17 @@ public class Mars extends Thread {
     return memory[getIndex(position + arg)].getValue();
   }
 
+  /*
+   * Accesseur en lecture sur un élément de la mémoire à partir de son adresse
+   */
   private Core getCore(int address) {
     return memory[getIndex(address)];
   }
 
+  /*
+   * Corrige éventuellement l'adresse en fonction de la taille de la mémoire
+   * afin d'éviter les débordements et faire boucler les adresses
+   */
   private int getIndex(int address) {
     while (address < 0) {
       address += memory.length;
@@ -139,10 +168,16 @@ public class Mars extends Thread {
     return address % memory.length;
   }
 
+  /*
+   * Accesseur en lecture des warriors
+   */
   public Warrior[] getWarriors() {
     return warriors;
   }
 
+  /*
+   * Initialise l'état de la mémoire à partir des programmes compilés des warriors
+   */
   private void initMemory() {
     Core p[];
     int i, j, k;
@@ -172,6 +207,9 @@ public class Mars extends Thread {
     }
   }
 
+  /* 
+   * Boucle principale du jeu
+   */
   public void run() {
     while (!isGameOver()) {
       for (Warrior warrior : warriors) {
@@ -181,6 +219,9 @@ public class Mars extends Thread {
     }
   }
 
+  /*
+   * Représentation textuelle de la mémoire
+   */
   public String toString() {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < memory.length; i++) {
