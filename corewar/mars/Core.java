@@ -4,7 +4,7 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Core {
-  public static final int MAX_ARG_VALUE = 0x0FFF;
+  //public static final int MAX_ARG_VALUE = 0x0FFF;
   private int value;
 
   /*
