@@ -90,7 +90,7 @@ public class UI {
         String fileName;
 
         reset();
-        System.out.println("/!\\ Votre warrior doit etre dans le dossier du meme nom a la racine du jeu/!\\\nExemple : dwarf.cor\n");
+        System.out.println("/!\\ Votre warrior doit etre dans le dossier du meme nom a la racine du jeu /!\\\nExemple : dwarf.red\n");
         do {
             System.out.print("Nom du warrior >> ");
             fileName = Read.S();
