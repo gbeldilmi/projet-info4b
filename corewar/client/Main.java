@@ -84,7 +84,7 @@ public class Main {
                         break;
                 }
             } else { //  Le joueur est dans une partie
-                //  Upload du warrior du
+                //  Upload du warrior du client
                 do {
                     response = client.request(API.uploadWarriorRequest(FileOperation.read(UI.selectWarrior())));
                 } while (!API.isValidResponse(response));
