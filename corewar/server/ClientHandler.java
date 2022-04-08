@@ -29,6 +29,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    //  Attend une requête (envoyé par le client) et demande au serveur la réponse à envoyer en retour
     @Override
     public void run() {
         String request = "";
@@ -50,6 +51,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    //  Envoi une réponse au client
     public void send(String response) {
         try {
             this.out.write(response);
@@ -60,6 +62,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    //  Ferme le ClientHandler
     public void close() {
         System.out.println(this.clientUsername + " s'est deconnecte !");
         this.server.removeClientHandler(this);

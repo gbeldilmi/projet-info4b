@@ -22,6 +22,7 @@ public class Server {
         thread.start();
     }
 
+    //  Accepte chaque demande de connexion et créé un nouveau ClientHandler associé à cette connexion
     public void start() {
         ClientHandler clientHandler;
         try {
@@ -37,13 +38,14 @@ public class Server {
         }
     }
 
-    //  Si client en jeu ????
+    //  Supprime un ClientHandler de l'attribut clientHandler et de sa partie
     public void removeClientHandler(ClientHandler clientHandler) {
         if (clientHandler.gameId != -1)
             this.games.get(clientHandler.gameId).removeClient(clientHandler);
         this.clientHandlers.remove(clientHandler);
     }
 
+    //  Supprime une partie
     public void removeGame(int gameId) {
         for (ClientHandler clientHandler : this.clientHandlers) {
             if (clientHandler.gameId == gameId) {
@@ -54,15 +56,33 @@ public class Server {
         this.games.set(gameId, null);
     }
 
+    //  Affiche une requête client
     private void echoRequest(String username, String request) {
-        System.out.println((username == null ? "unknown" : username) + "(request) -> " + request);
+        username = username == null ? "unknown" : username;
+        switch (API.getCallType(request)) {
+            case API.SETUSERNAME:
+                System.out.print(username + " a choisi le pseudo " + API.apiCallToArray(request)[1] + " -> "); break;
+            case API.CREATEGAME:
+                System.out.print(username + " veut creer une nouvelle partie -> "); break;
+            case API.GETGAMELIST:
+                System.out.print(username + " demande la liste des parties -> "); break;
+            case API.JOINGAME:
+                System.out.print(username + " veut rejoindre la partie " + API.apiCallToArray(request)[1] + " -> "); break;
+            case API.UPLOADWARRIOR:
+                System.out.print(username + " upload son warrior -> "); break;
+            case API.CLASSEMENT:
+                System.out.print(username + " demande le classement du serveur -> "); break;
+            default:
+                System.out.println("requete inconnue provenant de " + username); break;
+        }
     }
 
+    //  Affiche une réponse serveur
     private void echoResponse(String response) {
-        System.out.println("server (response) -> " + response);
+        System.out.println(API.isValidResponse(response) ? "OK" : "ERR");
     }
 
-    
+    //  Retourne une réponse en fonction de la requête demandée par le client
     public String response(ClientHandler clientHandler, String request) {
         String response = API.ERR;
 
@@ -87,6 +107,7 @@ public class Server {
         return response;
     }
 
+    //  Vérifie si un pseudo est disponnible et retourne une réponse en fonction
     private String setUsername(ClientHandler clientHandler, String request) {
         String username = API.apiCallToArray(request)[1];
 
@@ -100,6 +121,7 @@ public class Server {
         return API.VALID;
     }
 
+    //  Créé une nouvelle partie et retourne une réponse
     public String createGame(ClientHandler clientHandler, String request) {
         int gameLength;
         int i;
@@ -121,6 +143,7 @@ public class Server {
         return API.VALID + API.SEPARATOR + (gameLength);
     }
 
+    //  Ajoute une nouvelle partie à l'attribut game et à l'attribut classementHandler
     private void addGame(int i, Game game) {
         if (i == -1)
             this.games.add(game);
@@ -131,6 +154,7 @@ public class Server {
         thread.start();
     }
 
+    //  Retourne une réponse constituée de la liste de parties
     public String getGamesList() {
         String gameList = "";
         int length = this.games.size();
@@ -146,6 +170,7 @@ public class Server {
         return API.VALID + gameList;
     }
 
+    //  Ajoute un joueur à une partie et retourne une réponse en fonction
     public String joinGame(ClientHandler clientHandler, String request) {
         int gameId = Integer.parseInt(API.apiCallToArray(request)[1]);
 
@@ -156,6 +181,7 @@ public class Server {
         return API.VALID;
     }
 
+    //  Ajoute un nouveau warrior à une partie et retourne une réponse
     public String uploadWarrior(ClientHandler clientHandler, String request) {
         String[] requestArray = API.apiCallToArray(request);
         int length = requestArray.length;
@@ -171,6 +197,7 @@ public class Server {
         return API.VALID;
     }
 
+    //  Retourne une réponse construite à partir du classement du serveur
     public String getClassement() {
         String str = this.classementHandler.getClassement();
         

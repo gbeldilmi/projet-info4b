@@ -7,6 +7,16 @@ import java.io.File;
 import corewar.utils.Read;
 
 public class UI {
+    private static void printLogo() {
+        System.out.println(" ######  #####  ######  #######   #     #  #####  ######");
+        System.out.println("#       #     # #     # #         #     # #     # #     #");
+        System.out.println("#       #     # ######  #####     #  #  # ####### ######");
+        System.out.println("#       #     # #   #   #         #  #  # #     # #    #");
+        System.out.println(" ######  #####  #    #  #######    ## ##  #     # #     #");
+        System.out.println("");
+    }
+
+    //  Reset l'ecran de la console sur Linux ou Windows
     public static void reset() {
         try {
             if (System.getProperty("os.name").contains("Windows")) {
@@ -16,8 +26,10 @@ public class UI {
                 System.out.flush();
             }
         } catch (IOException | InterruptedException e) {}
+        printLogo();
     }
 
+    //  Demande de connexion et choix de l'ip du serveur
     public static String serverConnexion() {
         String choice;
 
@@ -37,6 +49,7 @@ public class UI {
         return "localhost";
     }
 
+    //  Choix du pseudo
     public static String usernameChoice(String msg) {
         reset();
         if (!msg.equals(""))
@@ -45,6 +58,7 @@ public class UI {
         return Read.S();
     }
 
+    //  Affichage du menu et choix
     public static String gameMenu() {
         String input;
 
@@ -57,6 +71,8 @@ public class UI {
         return input;
     }
 
+
+    //  Saisie du nombre de joueurs lors de la création du'ne nouvelle partie
     public static int numberOfPlayers() {
         int input;
 
@@ -69,6 +85,7 @@ public class UI {
         return input;
     }
 
+    //  Saisie d'un identifiant de partie valide
     public static int gameId(ArrayList<Integer> ids) {
         int input;
 
@@ -81,11 +98,13 @@ public class UI {
         return input;
     }
 
+    //  Mise en pause de l'ui
     public static void waiting() {
-        System.out.println("Appuyez sur [Entree] pour retourner au menu");
+        System.out.print("Appuyez sur [Entree] pour retourner au menu");
         Read.S();
     }
 
+    //  Saisie d'un nouveau warrior
     public static String selectWarrior() {
         String fileName;
 

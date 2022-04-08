@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-
 import corewar.utils.API;
 
 public class Client {
@@ -26,6 +25,7 @@ public class Client {
         }
     }
 
+    //  Envoi une requête et retourne une réponse serveur
     public String request(String request) {
         String response = "";
 
@@ -42,7 +42,7 @@ public class Client {
         return response;
     }
 
-    //  send request leave ????
+    //  Ferme le client proprement
     public void close() {
         try {
             if (this.in != null)

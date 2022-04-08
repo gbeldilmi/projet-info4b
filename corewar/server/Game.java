@@ -21,6 +21,8 @@ public class Game implements Runnable {
         this.warriors = initWarriors();
     }
 
+    //  Gère l'exécution d'une partie
+    @Override
     public void run() {
         while (!isFull() || !isAllWarriorUploaded()) {
             try {
@@ -29,18 +31,21 @@ public class Game implements Runnable {
                 e.printStackTrace();
             }
         }
+        System.out.println("la partie " + clientHandlers.get(0).gameId + " a commence !");
         this.mars = new Mars(this.warriors);
         this.mars.start();
         try {
             this.mars.join();
             this.setClassement();
             this.sendClassement();
+            System.out.println("la partie " + clientHandlers.get(0).gameId + " est terminee !");
             this.server.removeGame(this.clientHandlers.get(0).gameId);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }
 
+    //  Retourne le classement de la partie
     public String[] getClassement() {
         int length = this.warriors.length;
         String[] warriorNames = new String[length];
@@ -50,6 +55,7 @@ public class Game implements Runnable {
         return warriorNames;
     }
 
+    //  Trie les warriors du premier au dernier
     private void setClassement() {
         int length = this.warriors.length;
         Warrior swap;
@@ -65,6 +71,7 @@ public class Game implements Runnable {
         }
     }
 
+    //  Envoi le classement de la partie à chaque joueurs
     public void sendClassement() {
         String str = "";
         int i = 1;
@@ -79,6 +86,7 @@ public class Game implements Runnable {
         }
     }
 
+    //  Initialise un tableau de Warrior de taille maxPlayers à null
     private Warrior[] initWarriors() {
         Warrior[] warriors = new Warrior[this.maxPlayers];
 
@@ -87,10 +95,12 @@ public class Game implements Runnable {
         return warriors;
     }
 
+    //  Retourne true si la partie est complète
     public boolean isFull() {
         return this.clientHandlers.size() == this.maxPlayers;
     }
 
+    //  Retourne true si tous les Warrior ont été uploadés
     public boolean isAllWarriorUploaded() {
         for (int i = 0; i < this.warriors.length; i++) {
             if (this.warriors[i] == null)
@@ -99,6 +109,7 @@ public class Game implements Runnable {
         return true;
     }
 
+    //  Retourne l'index du client dont l'username correspond
     public int getClientId(String username) {
         int length = this.clientHandlers.size();
 
@@ -109,6 +120,7 @@ public class Game implements Runnable {
         return -1;
     }
     
+    //  Ajoute un nouveau warrior à la partie
     public synchronized void addWarrior(ClientHandler clientHandler, Warrior warrior) {
         int i = 0;
 
@@ -119,10 +131,12 @@ public class Game implements Runnable {
         clientHandler.warriorId = i;
     }
 
+    //  Ajoute un nouveau client à la partie
     public synchronized void addClient(ClientHandler clientHandler) {
         this.clientHandlers.add(clientHandler);
     }
 
+    //  Supprime un client de la partie
     public synchronized void removeClient(ClientHandler clientHandler) {
         if (clientHandler.warriorId == -1) {
             clientHandler.gameId = -1;
@@ -138,6 +152,7 @@ public class Game implements Runnable {
         }
     }
 
+    //  Retourne une représentation de la partie (de sa capacité)
     @Override
     public String toString() {
         return this.clientHandlers.size() + "/" + this.maxPlayers;

@@ -58,15 +58,4 @@ public class FileOperation {
 			e.printStackTrace();
 		}
 	}
-
-	//	Suppression d'un fichier
-	public static void delete(String path) {
-		File file = new File(path);
-
-		try {
-			file.delete();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
 }
