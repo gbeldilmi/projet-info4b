@@ -5,14 +5,18 @@ import corewar.mars.redcode.AddressMode;
 import corewar.mars.redcode.OpCode;
 
 public class Compiler {
-  public static Core[] compile(String[] program) throws RuntimeException {
+    /*
+     * Compile un programme redcode (où chaque instruction est une chaine de caractère)
+     * en un tableau d'objets Core
+     */
+    public static Core[] compile(String[] program) throws RuntimeException {
     int i, valueArg1, valueArg2;
     String[] instruction;
     OpCode opCode;
     AddressMode addressModeArg1, addressModeArg2;
     Core[] compiledProgram;
     if (program.length == 0) {
-      throw new RuntimeException("Empty program.");
+      throw new RuntimeException("Programme vide");
     }
     compiledProgram = new Core[program.length];
     for (i = 0; i < program.length; i++) {
@@ -26,7 +30,7 @@ public class Compiler {
       }
       if (opCode == OpCode.DAT || opCode == OpCode.JMP) {
         if (instruction.length != 2) {
-          throw new RuntimeException("Invalid number of arguments for " + opCode.toString() + " @" + (i + 1));
+          throw new RuntimeException("Nombre d'argument invalide pour " + opCode.toString() + " @" + (i + 1));
         }
         try {
           if (opCode == OpCode.JMP) {
@@ -36,11 +40,11 @@ public class Compiler {
             valueArg2 = Integer.parseInt(instruction[1]);
           }
         } catch (Exception e) {
-          throw new RuntimeException("Invalid argument for " + opCode.toString() + " @" + (i + 1));
+          throw new RuntimeException("Argument invalide pour " + opCode.toString() + " @" + (i + 1));
         }
       } else {
         if (instruction.length != 3) {
-          throw new RuntimeException("Invalid number of arguments for " + opCode.toString() + " @" + (i + 1));
+          throw new RuntimeException("Nombre d'argument invalide pour " + opCode.toString() + " @" + (i + 1));
         }
         try {
           addressModeArg1 = AddressMode.getAddressMode(instruction[1].charAt(0));
@@ -48,7 +52,7 @@ public class Compiler {
           addressModeArg2 = AddressMode.getAddressMode(instruction[2].charAt(0));
           valueArg2 = Integer.parseInt((addressModeArg2 == AddressMode.DIRECT) ? instruction[2] : instruction[2].substring(1));
         } catch (Exception e) {
-          throw new RuntimeException("Invalid argument for " + opCode.toString() + " @" + (i + 1));
+          throw new RuntimeException("Argument invalide pour " + opCode.toString() + " @" + (i + 1));
         }
       }
       compiledProgram[i] = new Core(opCode, addressModeArg1, addressModeArg2, valueArg1, valueArg2);
