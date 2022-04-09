@@ -43,6 +43,7 @@ public class Mars extends Thread {
     int position, target1, target2;
     boolean skipNext;
     if (warrior.isAlive()) {
+      // pleins de variables pour simplifier l'écriture des instructions
       skipNext = true;
       position = warrior.getPosition();
       core = memory[getIndex(position)];
@@ -50,48 +51,48 @@ public class Mars extends Thread {
       target2 = getAddress(position, core.getAddressModeArg2(), core.getArg2());
       targetCore1 = getCore(target1);
       targetCore2 = getCore(target2);
-      if (debug) {
+      if (debug) { // affichage de la méoire si debug activé
         System.out.println(">> Warrior " + warrior.getId() + " @" + position + " @t" + cycle + ": " + core);
         System.out.println(this);
       }
-      switch (core.getOpCode()) {
-        case MOV:          
+      switch (core.getOpCode()) { // OPCODE A B
+        case MOV: // Transférer contenu adresse A à adresse B
           targetCore2.setValue(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
-        case ADD:
+        case ADD: // Ajouter contenu adresse A à adresse B
           targetCore2.add(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
-        case SUB:
+        case SUB: // Soustraire contenu adresse A de contenu adresse B
           targetCore2.sub(core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue());
           skipNext = false;
           break;
-        case JMP:
+        case JMP: // Transférer exécution à adresse A
           warrior.setPosition(getIndex(target1));
           break;
-        case JMZ:
+        case JMZ: // Transférer exécution à adresse A seulement si contenu adresse B = 0
           if (targetCore2.getValue() == 0) {
             warrior.setPosition(getIndex(target1));
           } else {
             skipNext = false;
           }
           break;
-        case JMG:
+        case JMG: // Transférer exécution à adresse A seulement si contenu adresse B > 0
           if (targetCore2.getValue() > 0) {
             warrior.setPosition(getIndex(target1));
           } else {
             skipNext = false;
           }
           break;
-        case DJZ:
+        case DJZ: // Retrancher 1 du contenu adresse B et sauter à adresse A seulement si résultat = 0
           if (targetCore2.decrement()) {
             warrior.setPosition(getIndex(target1));
           } else {
             skipNext = false;
           }
           break;
-        case CMP:
+        case CMP: // Comparer contenus des adresses A et B, s'ils sont différents sauter l'instruction suivante
           if ((core.getAddressModeArg1() == AddressMode.IMMEDIATE ? target1 : targetCore1.getValue()) == 
               (core.getAddressModeArg2() == AddressMode.IMMEDIATE ? target2 : targetCore2.getValue())) {
             warrior.setPosition(getIndex(target1));
@@ -99,7 +100,7 @@ public class Mars extends Thread {
             skipNext = false;
           }
           break;
-        default:
+        default: // DAT (Instruction non exécutable)
           warrior.die(countAliveWarriors());
       }
       if (!skipNext) {
@@ -181,22 +182,27 @@ public class Mars extends Thread {
   private void initMemory() {
     Core p[];
     int i, j, k;
+    // Cherche la taille la plus grande
     for (i = j = 0; i < warriors.length; i++) {
       k = warriors[i].getProgram().length;
       if (k > j) {
         j = k;
       }
     }
+    // On adapte si c'est trop petit
     if ((j *= 2) < MIN_WARRIOR_SIZE) {
       j = MIN_WARRIOR_SIZE;
     }
     memory = new Core[j * warriors.length];
+    // On place les warriors aux bonnes adresses
     for (i = 0; i < warriors.length; i++) {
       warriors[i].setPosition(i * j);
     }
+    // On remplit la mémoire
     for (i = 0; i < memory.length; i++) {
       memory[i] = new Core();
     }
+    // On copie les programmes des warriors
     for (i = 0; i < warriors.length; i++) {
       p = warriors[i].getProgram();
       k = warriors[i].getPosition();

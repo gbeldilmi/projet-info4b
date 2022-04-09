@@ -66,6 +66,7 @@ public class Core {
   public int getArg2() {
     return getArgComplement(value & 0x0FFF);
   }
+  /* Corrige le complément de l'argument */
   private int getArgComplement(int arg) {
     return ((arg & 0x0800) != 0) ? arg | 0xFFFFF000 : arg;
   }

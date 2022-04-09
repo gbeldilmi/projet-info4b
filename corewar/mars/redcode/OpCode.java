@@ -12,7 +12,7 @@ public enum OpCode {
         return op;
       }
     }
-    throw new RuntimeException("Unknown opcode: " + mnemonic);
+    throw new RuntimeException("Opcode inconnu : " + mnemonic);
   }
 
   /*
